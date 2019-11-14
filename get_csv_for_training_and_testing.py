@@ -289,6 +289,7 @@ if __name__ == '__main__':
     arg('--run_root', default='/Users/yefeichen/Database/location_recommender_system/')
     arg('--ls_card',default='location_scorecard_191113.csv')
     arg('--app_date',default='_191114')
+    arg('--ratio',type=float,default=0.8)
     args = parser.parse_args()
 
     datapath = args.run_root
@@ -299,7 +300,7 @@ if __name__ == '__main__':
     clfile = ['PA', 'SF', 'SJ', 'LA', 'NY']
     clfile = [c + apps for c in clfile]
 
-    print('Args:',datapath,apps,lfile)
+    print('Args:',datapath,apps,lfile,args.ratio)
 
     not_feat_col = ['duns_number',
                     'atlas_location_uuid',
@@ -334,8 +335,9 @@ if __name__ == '__main__':
         # train_test_val_pairs :[ duns_number, atlas_location_uuid, label, city, fold ]
         pair_dat = getPosNegdatv2_fast(pdcl)
         tr, tt = splitdat(pair_dat, key_column=['duns_number', 'atlas_location_uuid'], right_colunm='label_tr',
-                          rate_tr=0.8)
+                          rate_tr=args.ratio)
         # training pair ==> pair format with positive only
+        ## ATT need acceleration!!!!!
         train_pos_pair = \
         tr[tr['label'] == 1].groupby(['duns_number', 'atlas_location_uuid', 'label']).first().reset_index()[
             ['duns_number', 'atlas_location_uuid', 'label']]
