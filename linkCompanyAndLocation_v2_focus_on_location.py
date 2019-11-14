@@ -113,6 +113,7 @@ if __name__ == '__main__':
     arg('--run_root', default='/Users/yefeichen/Database/location_recommender_system/')
     arg('--ls_card',default='location_scorecard_191113.csv')
     arg('--apps',default='_191114.csv')
+    arg('--geo_bit',type=int,default=6)
     args = parser.parse_args()
 
 
@@ -120,8 +121,9 @@ if __name__ == '__main__':
     cfile = ['dnb_pa.csv', 'dnb_sf.csv', 'dnb_sj.csv', 'dnb_Los_Angeles.csv', 'dnb_New_York.csv']
     lfile = args.ls_card
     apps = args.apps
+    precision = args.geo_bit
 
-    print(datapath,lfile,apps)
+    print(datapath,lfile,apps,precision)
 
     pdc1 = pd.read_csv(pjoin(datapath, cfile[0]))
     pdc2 = pd.read_csv(pjoin(datapath, cfile[1]))
@@ -132,27 +134,27 @@ if __name__ == '__main__':
     # pdc = pd.concat([pdc1,pdc2,pdc3],axis=0)
     pdl = pd.read_csv(pjoin(datapath, lfile))
 
-    linkCL1 = fuzzy_geosearchv2(pdc1,pdl,thresh=500)
+    linkCL1 = fuzzy_geosearchv2(pdc1,pdl,precision=precision,thresh=500)
     print(len(linkCL1))
     linkCL1.to_csv(pjoin(datapath,'PA'+apps),index = None, header=True)
     del linkCL1
 
-    linkCL2 = fuzzy_geosearchv2(pdc2,pdl,thresh=500)
+    linkCL2 = fuzzy_geosearchv2(pdc2,pdl,precision=precision,thresh=500)
     print(len(linkCL2))
     linkCL2.to_csv(pjoin(datapath,'SF'+apps),index = None, header=True)
     del linkCL2
 
-    linkCL3 = fuzzy_geosearchv2(pdc3,pdl,thresh=500)
+    linkCL3 = fuzzy_geosearchv2(pdc3,pdl,precision=precision,thresh=500)
     print(len(linkCL3))
     linkCL3.to_csv(pjoin(datapath,'SJ'+apps),index = None, header=True)
     del linkCL3
 
-    linkCL4 = fuzzy_geosearchv2(pdc4,pdl,thresh=500)
+    linkCL4 = fuzzy_geosearchv2(pdc4,pdl,precision=precision,thresh=500)
     print(len(linkCL4))
     linkCL4.to_csv(pjoin(datapath,'LA'+apps),index = None, header=True)
     del linkCL4
 
-    linkCL5 = fuzzy_geosearchv2(pdc5,pdl,thresh=500)
+    linkCL5 = fuzzy_geosearchv2(pdc5,pdl,precision=precision,thresh=500)
     print(len(linkCL5))
     linkCL5.to_csv(pjoin(datapath,'NY'+apps),index = None, header=True)
     del linkCL5
