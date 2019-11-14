@@ -123,6 +123,9 @@ if __name__ == '__main__':
 
     datapath =args.run_root
     cfile = ['dnb_pa.csv', 'dnb_sf.csv', 'dnb_sj.csv', 'dnb_Los_Angeles.csv', 'dnb_New_York.csv']
+    clfile = ['PA', 'SF', 'SJ', 'LA', 'NY']
+
+
     lfile = args.ls_card
     apps = args.apps
     precision = args.geo_bit
@@ -130,37 +133,15 @@ if __name__ == '__main__':
 
     print(datapath,lfile,apps,precision,dist_thresh)
 
-    pdc1 = pd.read_csv(pjoin(datapath, cfile[0]))
-    pdc2 = pd.read_csv(pjoin(datapath, cfile[1]))
-    pdc3 = pd.read_csv(pjoin(datapath, cfile[2]))
-    pdc4 = pd.read_csv(pjoin(datapath, cfile[3]))
-    pdc5 = pd.read_csv(pjoin(datapath, cfile[4]))
+    clfile = [c + apps for c in clfile]
 
-    # pdc = pd.concat([pdc1,pdc2,pdc3],axis=0)
     pdl = pd.read_csv(pjoin(datapath, lfile))
 
-    linkCL1 = fuzzy_geosearchv2(pdc1,pdl,precision=precision,thresh=dist_thresh)
-    print(len(linkCL1))
-    linkCL1.to_csv(pjoin(datapath,'PA'+apps),index = None, header=True)
-    del linkCL1
+    #shrink into 1 code
+    for ind_city in range(5):
+        pdc = pd.read_csv(pjoin(datapath, cfile[ind_city]))
+        linkCL = fuzzy_geosearchv2(pdc,pdl,precision=precision,thresh=dist_thresh)
+        print(len(linkCL))
+        linkCL.to_csv(pjoin(datapath,clfile[ind_city]),index = None, header=True)
 
-    linkCL2 = fuzzy_geosearchv2(pdc2,pdl,precision=precision,thresh=dist_thresh)
-    print(len(linkCL2))
-    linkCL2.to_csv(pjoin(datapath,'SF'+apps),index = None, header=True)
-    del linkCL2
-
-    linkCL3 = fuzzy_geosearchv2(pdc3,pdl,precision=precision,thresh=dist_thresh)
-    print(len(linkCL3))
-    linkCL3.to_csv(pjoin(datapath,'SJ'+apps),index = None, header=True)
-    del linkCL3
-
-    linkCL4 = fuzzy_geosearchv2(pdc4,pdl,precision=precision,thresh=dist_thresh)
-    print(len(linkCL4))
-    linkCL4.to_csv(pjoin(datapath,'LA'+apps),index = None, header=True)
-    del linkCL4
-
-    linkCL5 = fuzzy_geosearchv2(pdc5,pdl,precision=precision,thresh=dist_thresh)
-    print(len(linkCL5))
-    linkCL5.to_csv(pjoin(datapath,'NY'+apps),index = None, header=True)
-    del linkCL5
 

@@ -337,10 +337,16 @@ if __name__ == '__main__':
         tr, tt = splitdat(pair_dat, key_column=['duns_number', 'atlas_location_uuid'], right_colunm='label_tr',
                           rate_tr=args.ratio)
         # training pair ==> pair format with positive only
+
+        pot_pos_dat = pdcl[['duns_number', 'atlas_location_uuid']]
+        pot_pos_dat = pd.merge(pot_pos_dat,tt,on=['duns_number', 'atlas_location_uuid'],how='left',suffixes=['','_right'])
+        train_pos_pair = pot_pos_dat[pot_pos_dat['label'].isnull()]
+        train_pos_pair['label'] = 1
         ## ATT need acceleration!!!!!
-        train_pos_pair = \
-        tr[tr['label'] == 1].groupby(['duns_number', 'atlas_location_uuid', 'label']).first().reset_index()[
-            ['duns_number', 'atlas_location_uuid', 'label']]
+        # train_pos_pair = \
+        # tr[tr['label'] == 1].groupby(['duns_number', 'atlas_location_uuid', 'label']).first().reset_index()[
+        #     ['duns_number', 'atlas_location_uuid', 'label']]
+
         # testing pair ==> pair format with positive and negative both
         testing_pair = tt.reset_index()[['duns_number', 'atlas_location_uuid', 'label']]
 
