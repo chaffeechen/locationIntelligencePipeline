@@ -71,7 +71,7 @@ def calcLinkTable(datComp, datLoc, verbose=True):
 def calcLinkTablev2(datComp, datLoc, dist_thresh=500,verbose=True):
     if not verbose:
         print('merging...')
-    df_cartesian = pd.merge(datLoc, datComp, on='geohash', how='outer', suffixes=['_loc', '_comp'])
+    df_cartesian = pd.merge(datLoc, datComp, on='geohash', how='left', suffixes=['_loc', '_comp'])
     if not verbose:
         print(list(df_cartesian.columns))
         print(len(df_cartesian))
