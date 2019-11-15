@@ -82,9 +82,8 @@ def calcLinkTablev2(datComp, datLoc, dist_thresh=500,verbose=True):
             lambda row: geo_distance(row['longitude_comp'], row['latitude_comp'], row['longitude_loc'],
                                      row['latitude_loc']), axis=1)
         df_loc_comp = df_cartesian[df_cartesian['geo_distance'] <= dist_thresh]
-
     else:
-        df_loc_com = df_cartesian
+        df_loc_comp = df_cartesian
 
     result = df_loc_comp[['duns_number', 'atlas_location_uuid', 'longitude_loc', 'latitude_loc']]
     num_used_loc = len(result.groupby('atlas_location_uuid').first().reset_index())
@@ -97,6 +96,14 @@ def calcLinkTablev2(datComp, datLoc, dist_thresh=500,verbose=True):
 
 
 def fuzzy_geosearchv2(datComp, datLoc, precision=5, thresh=500):
+    """
+    Each company can have multiply location in range controlled by precision and threshold.
+    :param datComp: 
+    :param datLoc: 
+    :param precision: 
+    :param thresh: 
+    :return: 
+    """
     print('Initial company num:', len(datComp))
     datLoc_city = cityfilter(datComp, datLoc)
     print(len(datComp), len(datLoc_city))
@@ -108,6 +115,41 @@ def fuzzy_geosearchv2(datComp, datLoc, precision=5, thresh=500):
     linkCL = calcLinkTablev2(datComp_city, datLoc_city, dist_thresh=thresh)
 
     return linkCL
+
+
+def fuzzy_geosearch(datComp, datLoc, precision=[8, 7, 6, 5], thresh=[500, 1000, 1000, 1000]):
+    """
+    A coarse to fine way to assign each company a unique location. 
+    :param datComp: 
+    :param datLoc: 
+    :param precision: 
+    :param thresh: 
+    :return: 
+    """
+    print('Initial company num:', len(datComp))
+    datLoc_city = cityfilter(datComp, datLoc)
+    print(len(datComp), len(datLoc_city))
+    datComp_city = datComp[['duns_number', 'longitude', 'latitude']]
+    datLoc_city = datLoc_city[['atlas_location_uuid', 'longitude', 'latitude']]
+    datlist = []
+
+    for i, p in enumerate(precision):
+        print('level:', p)
+        geohash(datComp_city, p)
+        geohash(datLoc_city, p)
+        linkCL = calcLinkTable(datComp_city, datLoc_city)
+        datlist.append(linkCL[linkCL['geo_distance'] <= thresh[i]])
+        unmatched = linkCL[linkCL['geo_distance'] > thresh[i]].groupby('duns_number', as_index=False).first()
+        if len(unmatched) == 0:
+            print('all companies matched with a building')
+            break
+        datComp_city = pd.merge(datComp_city, unmatched['duns_number'], on='duns_number', how='inner')
+        print('datComp_city:', len(datComp_city))
+
+    res = pd.concat(datlist, axis=0, ignore_index=True)
+    print('Initial company num:', len(datComp), 'vs. Remain company num:', len(res), 'rate:=',
+          float(len(res)) / len(datComp))
+    return res
 
 if __name__ == '__main__':
     # data load

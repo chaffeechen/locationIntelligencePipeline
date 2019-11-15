@@ -86,8 +86,8 @@ def getPosNegdatv2_fast(dat):
 
     print('Clean %d neg data into %d real neg data.' % (len(pot_neg_dat), len(neg_dat)))
 
-    res_dat = pd.concat([dat, neg_dat], axis=0)
-    res_dat = res_dat.groupby(['duns_number', 'atlas_location_uuid'])['label'].max().reset_index()
+    res_dat = pd.concat([dat, neg_dat], axis=0).reset_index(drop=True)
+    # res_dat = res_dat.groupby(['duns_number', 'atlas_location_uuid'])['label'].max().reset_index()
     return res_dat
 
 
@@ -155,13 +155,14 @@ def max_col(dat, col, minval=1):
     dat[col] = dat[col].apply(lambda r: max(r, minval))
 
 
-def comp_dat_process(dat, do_dummy=True):
+def comp_dat_process(dat, one_hot_col_name, cont_col_name , spec_col_name ,do_dummy=True):
     """
     pd -> company key,cont_feature,spec_feature,dum_feature
     """
-    one_hot_col_name = ['major_industry_category', 'location_type', 'primary_sic_2_digit']
-    spec_col_name = 'emp_here_range'
-    cont_col_name = ['emp_here', 'emp_total', 'sales_volume_us', 'square_footage']
+    # one_hot_col_name = ['major_industry_category', 'location_type', 'primary_sic_2_digit']
+    # spec_col_name = 'emp_here_range'
+    # cont_col_name = ['emp_here', 'emp_total', 'sales_volume_us', 'square_footage']
+    cont_col_name = [ c for c in cont_col_name if c not in spec_col_name ]
 
     if do_dummy:
         print('doing one-hot...')
@@ -188,17 +189,16 @@ def comp_dat_process(dat, do_dummy=True):
     return res_dat
 
 
-def location_dat_process(dat, do_dummy=True):
+def location_dat_process(dat, one_hot_col_name, cont_col_name ,do_dummy=True):
     """
     pd -> location key,cont_feature,dum_feature
     """
-    one_hot_col_name = ['building_class']
-    cont_col_name = ['score_predicted_eo', 'score_employer', 'num_emp_weworkcore', 'num_poi_weworkcore',
-                     'pct_wwcore_employee', 'pct_wwcore_business', 'num_retail_stores', 'num_doctor_offices',
-                     'num_eating_places', 'num_drinking_places', 'num_hotels', 'num_fitness_gyms',
-                     'population_density', 'pct_female_population', 'median_age', 'income_per_capita',
-                     'pct_masters_degree', 'walk_score', 'bike_score']
-
+    # one_hot_col_name = ['building_class']
+    # cont_col_name = ['score_predicted_eo', 'score_employer', 'num_emp_weworkcore', 'num_poi_weworkcore',
+    #                  'pct_wwcore_employee', 'pct_wwcore_business', 'num_retail_stores', 'num_doctor_offices',
+    #                  'num_eating_places', 'num_drinking_places', 'num_hotels', 'num_fitness_gyms',
+    #                  'population_density', 'pct_female_population', 'median_age', 'income_per_capita',
+    #                  'pct_masters_degree', 'walk_score', 'bike_score']
     if do_dummy:
         print('doing one-hot...')
         dum_dat = onehotdat(dat, one_hot_col_name, False)
@@ -308,6 +308,7 @@ if __name__ == '__main__':
                     'latitude_loc',
                     'label']
     cont_col_nameC = ['emp_here', 'emp_total', 'sales_volume_us', 'square_footage', 'emp_here_range']
+    spec_col_nameC = 'emp_here_range'
     cont_col_nameL = ['score_predicted_eo', 'score_employer', 'num_emp_weworkcore', 'num_poi_weworkcore',
                       'pct_wwcore_employee', 'pct_wwcore_business', 'num_retail_stores', 'num_doctor_offices',
                       'num_eating_places', 'num_drinking_places', 'num_hotels', 'num_fitness_gyms',
@@ -315,6 +316,10 @@ if __name__ == '__main__':
                       'pct_masters_degree', 'walk_score', 'bike_score']
     key_col_comp = ['duns_number']
     key_col_loc = ['atlas_location_uuid']
+
+    dummy_col_nameL = ['building_class']
+    dummy_col_nameC = ['major_industry_category', 'location_type', 'primary_sic_2_digit']
+
 
     ##Multi training data generator(multi city)
     # 如果不合并所有数据在进行dummy 会出现一些category在某些城市不出现的情况，从而导致问题
@@ -376,11 +381,11 @@ if __name__ == '__main__':
 
     # building feature
     pdlls = pdlls.reset_index()
-    proc_pdl = location_dat_process(pdlls)
+    proc_pdl = location_dat_process(pdlls,one_hot_col_name=dummy_col_nameL,cont_col_name=cont_col_nameL)
 
     # company feature
     pdccs = pdccs.reset_index()
-    proc_pdc = comp_dat_process(pdccs)
+    proc_pdc = comp_dat_process(pdccs,one_hot_col_name=dummy_col_nameC,cont_col_name=cont_col_nameC,spec_col_name=spec_col_nameC)
     print(len(proc_pdc))
 
     print('start saving company and location feature...')
