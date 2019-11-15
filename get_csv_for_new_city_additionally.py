@@ -22,16 +22,16 @@ if __name__ == '__main__':
     arg = parser.add_argument
     arg('--run_root', default='/Users/yefeichen/Database/location_recommender_system/')
     arg('--ls_card',default='location_scorecard_191113.csv')
-    arg('--app_date',default='_191114')
+    arg('--app_date',default='_191114_add')
     arg('--ratio',type=float,default=0.8)
     args = parser.parse_args()
 
     datapath = args.run_root
-    cfile = ['dnb_pa.csv', 'dnb_sf.csv', 'dnb_sj.csv', 'dnb_Los_Angeles.csv', 'dnb_New_York.csv']
+    cfile = ['dnb_pa.csv']
     app_date = args.app_date
     apps = app_date + '.csv'
     lfile = args.ls_card  # It is fixed as input
-    clfile = ['PA', 'SF', 'SJ', 'LA', 'NY']
+    clfile = ['PA']
     clfile = [c + apps for c in clfile]
 
     print('Args:',datapath,apps,lfile,args.ratio)
@@ -41,7 +41,7 @@ if __name__ == '__main__':
                     'longitude_loc',
                     'latitude_loc',
                     'label']
-    cont_col_nameC = ['emp_here', 'emp_total', 'sales_volume_us', 'square_footage', 'emp_here_range']
+    cont_col_nameC = ['emp_here', 'emp_total', 'sales_volume_us', 'square_footage', 'emp_here_range'] #make sure that spec_col_nameC is in the end of line!!!
     spec_col_nameC = 'emp_here_range'
     cont_col_nameL = ['score_predicted_eo', 'score_employer', 'num_emp_weworkcore', 'num_poi_weworkcore',
                       'pct_wwcore_employee', 'pct_wwcore_business', 'num_retail_stores', 'num_doctor_offices',
@@ -65,7 +65,7 @@ if __name__ == '__main__':
 
     pdlls = []  # all location feat pd list
     pdccs = []
-    for ind_city in range(5):
+    for ind_city in range(len(cfile)):
         pdc = pd.read_csv(pjoin(datapath, cfile[ind_city]))
         pdl = pd.read_csv(pjoin(datapath, lfile))
         pdcl = pd.read_csv(pjoin(datapath, clfile[ind_city]))
@@ -110,77 +110,54 @@ if __name__ == '__main__':
         pdccs.append(pdc)
 
     # for loop end
-    pdlls = pd.concat(pdlls, axis=0)
-    pdccs = pd.concat(pdccs, axis=0)
-
     # building feature
-    pdlls = pdlls.reset_index()
-    proc_pdl = location_dat_process(pdlls,one_hot_col_name=dummy_col_nameL,cont_col_name=cont_col_nameL)
-
     # company feature
-    pdccs = pdccs.reset_index()
-    proc_pdc = comp_dat_process(pdccs,one_hot_col_name=dummy_col_nameC,cont_col_name=cont_col_nameC,spec_col_name=spec_col_nameC)
-    print(len(proc_pdc))
+    pdlls = pd.concat(pdlls, axis=0).reset_index(drop=True)
+    pdccs = pd.concat(pdccs, axis=0).reset_index(drop=True)
 
-    print('start saving company and location feature...')
-
-    XC_comp, XD_comp, Y_comp, c_comp_name, d_comp_name, y_comp_name = transpd2np_single(proc_pdc, cont_col_nameC,
-                                                                                        not_feat_col,
-                                                                                        id_col_name=key_col_comp)
-    XC_loc, XD_loc, Y_loc, c_loc_name, d_loc_name, y_loc_name = transpd2np_single(proc_pdl['data'], cont_col_nameL,
-                                                                                  not_feat_col, id_col_name=key_col_loc)
+    print('start processing company and location feature...')
 
     # one hot explanation
     comp_one_hot_col_name = dummy_col_nameC #['major_industry_category', 'location_type', 'primary_sic_2_digit']
     loc_one_hot_col_name = dummy_col_nameL #['building_class']
 
-    loc_coldict = {}
-    for colname in loc_one_hot_col_name:
-        loc_coldict[colname] = []
-        for dummyname in d_loc_name:
-            if dummyname.startswith(colname):
-                catname = dummyname.replace(colname, '', 1)  # replace only once(for the sake of protection)
-                loc_coldict[colname].append(catname[1:])
+    print('one hot description loading...')
+    comp_coldict = load_obj(pjoin(datapath, 'comp_feat_dummy_param' + app_date))
+    loc_coldict = load_obj(pjoin(datapath, 'loc_feat_dummy_param' + app_date))
 
-    comp_coldict = {}
-    for colname in comp_one_hot_col_name:
-        comp_coldict[colname] = []
-        for dummyname in d_comp_name:
-            if dummyname.startswith(colname):
-                catname = dummyname.replace(colname, '', 1)  # replace only once(for the sake of protection)
-                comp_coldict[colname].append(catname[1:])
+    print('dummy...')
+    XD_comp = apply_dummy(coldict=comp_coldict, data=pdccs)
+    XD_loc = apply_dummy(coldict=loc_coldict, data=pdlls)
 
-    print(comp_coldict, loc_coldict)
+    print('normalization descriptor loading...')
+    comp_norm_param = load_obj(pjoin(datapath, 'comp_feat_norm_param' + app_date))
+    loc_norm_param = load_obj(pjoin(datapath, 'loc_feat_norm_param' + app_date))
 
-    save_obj(comp_coldict, pjoin(datapath, 'comp_feat_dummy_param' + app_date))
-    save_obj(loc_coldict, pjoin(datapath, 'loc_feat_dummy_param' + app_date))
+    print('normalization...')
 
-    print('one hot description stored...')
+    cont_comp = comp_dat_process(pdccs, one_hot_col_name=dummy_col_nameC,cont_col_name=cont_col_nameC,\
+                                 spec_col_name=spec_col_nameC, do_dummy=False)
+    cont_loc = location_dat_process(pdlls, one_hot_col_name=dummy_col_nameL,cont_col_name=cont_col_nameL, \
+                                    do_dummy=False)
 
-    print('Start normalization')
+    XC_comp = apply_para_normalize_dat(cont_comp[cont_col_nameC], comp_norm_param['C_comp'],
+                                              comp_norm_param['S_comp'])
+    XC_loc = apply_para_normalize_dat(cont_loc['data'][cont_col_nameL], loc_norm_param['C_loc'],
+                                             loc_norm_param['S_loc'])
 
-    C_comp, S_comp = get_para_normalize_dat(XC_comp)
-    C_loc, S_loc = get_para_normalize_dat(XC_loc)
-    XC_comp = apply_para_normalize_dat(XC_comp, C_comp, S_comp)
-    XC_loc = apply_para_normalize_dat(XC_loc, C_loc, S_loc)
+    Y_loc = pdlls[key_col_loc].to_numpy()
+    Y_comp = pdccs[key_col_comp].to_numpy()
 
     X_comp = np.concatenate([Y_comp, XC_comp, XD_comp], axis=1)
     X_loc = np.concatenate([Y_loc, XC_loc, XD_loc], axis=1)
 
-    comp_norm_param = {
-        'C_comp': C_comp,
-        'S_comp': S_comp,
-        'columns': c_comp_name
-    }
+    y_comp_name = key_col_comp
+    y_loc_name = key_col_loc
+    c_comp_name = cont_col_nameC
+    d_comp_name = dummy_col_nameC
+    c_loc_name = cont_col_nameL
+    d_loc_name = dummy_col_nameL
 
-    loc_norm_param = {
-        'C_loc': C_loc,
-        'S_loc': S_loc,
-        'columns': c_loc_name
-    }
-
-    save_obj(comp_norm_param, pjoin(datapath, 'comp_feat_norm_param' + app_date))
-    save_obj(loc_norm_param, pjoin(datapath, 'loc_feat_norm_param' + app_date))
 
     dat_comp_pd = pd.DataFrame(data=X_comp, columns=y_comp_name + c_comp_name + d_comp_name)
     dat_loc_pd = pd.DataFrame(data=X_loc, columns=y_loc_name + c_loc_name + d_loc_name)
