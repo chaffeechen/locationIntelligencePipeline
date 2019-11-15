@@ -1,80 +1,76 @@
-input data: 
+locationIntelligencePipeline
 
-company_feature = [key:cid,feat_1,...,featN]
-location_feature = [key:bid,feat_1,...,featM]
+1. linkCompanyAndLocation_v2_focus_on_location.py
 
-corresponding file link: https://drive.google.com/drive/folders/1eOzqzBmGu0DLxuXrtOJ_F7dGsOQ0x5Ww?usp=sharing
+	Function: Build the relationship between company and location, where only geo position of both are given. Either one company assigned with one location or one company assigned with multiple location in range will be fine.
 
-output: score of company and location
+	Usage: --run_root [path of data] --ls_card [name of location_scorecard ( location feature ) ] --apps [output file will append it after the original name] --geobit [precision used for geohash matching] --dist_thresh [threshold of distance that used to get rid of some companis far away from the location in the same geohash]
 
-file:
+	Inputs:
 
-1. linkCompanyAndLocation.ipynb
+		1.1. location_scorecard:
 
-	Assign each company a location by geo information, if the distance between company and location is less than 1km.
+			The feature of buildings including the building class, size, city ,wework_belongs and so on with key 'atlas_location_uuid'.
 
-2.	LR pipeline.ipynb
+		1.2. company feature in each city separately:
 
-	Prediction model test.
-	Data normalization is done.
-	Predict the score of company and location with their feature directly: [ company_feat, location_feat], using Logistic Regression.
+			E.g: ['dnb_pa.csv', 'dnb_sf.csv', 'dnb_sj.csv', 'dnb_Los_Angeles.csv', 'dnb_New_York.csv']
 
-3.	gbdt_pipeline.ipynb
+			Each file contains information of a company with key 'duns_number'.
 
-	 Model test.
-	 Data normalization is done.
-	 Predict the score of company and location with their feature directly: [ company_feat, location_feat], using Gradient Boosting Tree.
+	Outputs:
 
-4. unsupervised learning pipeline.ipynb
+		File that contains pair of company and location. 
+		Lets call such file as 'company-location relationship file'.
+		It will be named as ['PA', 'SF', 'SJ', 'LA', 'NY'] + app_date + '.csv'.
 
-	Prediction model test.
-	Data normalization is done.
-	Predict the score of company and location by projecting each building into company feature space, which means represent each building with companies inside it.
+2. get_csv_for_training_and_testing.py
 
-5. unsupervised scorecard generator.ipynb
+	Function: Generate the training/testing file for ML.
 
-	Generate the score of company and location through the whole data.
-	Because the calculation is too big in some city, we slice the distance matrix into several rows to make it work.
+	Usage: --run_root [path of data] --ls_card [name of location_scorecard ( location feature ) ] --app_date [output file will append date after the original name] --ratio [ratio of training sample: testing sample]
 
-6. LR pipeline with unsupervised score.ipynb
+	Inputs: 
 
-	Prediction model test.
-	Data normalization is done.
-	Predict the score of company and location with their features and score of unsupervised result: [ company_feat, location_feat, score], using Logistic Regression.
-	To prevent data leak, if the company is in one location, then their score will be calculated without that company.
+		1.1. location_scorecard:
 
-7. LR cross feature.ipynb
+			The feature of buildings including the building class, size, city ,wework_belongs and so on with key 'atlas_location_uuid'.
 
-	Prediction model test.
-	Data normalization is done.
-	Predict the score of company and location with their features and cross-feature: [ company_feat, location_feat, company_x_location_feat ], using Logistic Regression.
+		1.2. company feature in each city separately:
 
-8. standard_test_unsupervised_learning.ipynb, standard_test_supervised_learning_lr.ipynb, standard_test_supervised_learning_lr_ensemble.ipynb
-	
-	Standard test for unsupervised/supervised method, with identical testset.
-	Each company from testset are compared with all the locations in that city.
-	Both auc of roc and topk-recalled precision is evaluated.
-	Each company in testset is invisible to trainset.
-	During the procedure of ensembling, in order to avoid information leak, each company is dropped from his own building when calculating the similarity score.
+			E.g: ['dnb_pa.csv', 'dnb_sf.csv', 'dnb_sj.csv', 'dnb_Los_Angeles.csv', 'dnb_New_York.csv']
 
-9. demo/demo_for_company_in_location_out.ipynb
+			Each file contains information of a company with key 'duns_number'.
 
-	Demo of recall topk locations for companies with unsupervised score.
+		1.3. company-location relationship file:
 
-10. data_process_for_training_validation/merge_additional_location_into_scorecard.ipynb + get csv for training and testing.ipynb
+			E.g: ['PA', 'SF', 'SJ', 'LA', 'NY'] + apps.
 
-	Add additional location buildings into original location scorecard.
-	Then doing company-location assignment with linkCompanyAndLocation.ipynb.
-	Split the data for training with get csv for training and testing.ipynb.
+			It was generated by linkCompanyAndLocation_v2_focus_on_location.py ahead.
 
-11. sub_recommend_reason/sub_recommend_reason_offline.ipynb
+	Outputs:
 
-	Generate 2 types of recommend reason: location self reason and company-location reason.
-	Location self reason includes: GYM, Eating place, Drinking place ( Above average level of city ). 
-	Company-location reason includes: similar type of company inside the location.
-	Then, merge the reason with company-location score.
-	Only ww location is considered and if the location has no reason, then it will be removed.
-	It is reasonable because it works as recall componet.
-	
+		Files that can be used to train a model:
 
-	
+		'train_val_test_location_company_82split'+apps: Train/test pairs where train set only contains P data while test pairs contains P/N data.
+
+		'company_feat' + apps: Normalized feature of each company.
+
+		'location_feat' + apps: Normalized feature of each location.
+
+		'comp_feat_norm_param' + app_date + '.pkl': Parameters for normalization of continuous feature of company : mean/std, column names.
+
+		'loc_feat_norm_param' + app_date + '.pkl': Parameters for normalization of continuous feature of location : mean/std, column names.
+
+		'comp_feat_dummy_param' + app_date + '.pkl': Parameters for dummy feature of company: {key: original column name, item: category list}.
+
+		'loc_feat_dummy_param' + app_date + '.pkl': Parameters for dummy feature of location: {key: original column name, item: category list}.
+
+
+
+
+
+
+
+
+
