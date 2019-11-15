@@ -162,7 +162,7 @@ def comp_dat_process(dat, one_hot_col_name, cont_col_name , spec_col_name ,do_du
     # one_hot_col_name = ['major_industry_category', 'location_type', 'primary_sic_2_digit']
     # spec_col_name = 'emp_here_range'
     # cont_col_name = ['emp_here', 'emp_total', 'sales_volume_us', 'square_footage']
-    cont_col_name = [ c for c in cont_col_name if c not in spec_col_name ]
+    cont_col_name = [ c for c in cont_col_name if c != spec_col_name ]
 
     if do_dummy:
         print('doing one-hot...')
@@ -397,8 +397,8 @@ if __name__ == '__main__':
                                                                                   not_feat_col, id_col_name=key_col_loc)
 
     # one hot explanation
-    comp_one_hot_col_name = ['major_industry_category', 'location_type', 'primary_sic_2_digit']
-    loc_one_hot_col_name = ['building_class']
+    comp_one_hot_col_name = dummy_col_nameC #['major_industry_category', 'location_type', 'primary_sic_2_digit']
+    loc_one_hot_col_name = dummy_col_nameL #['building_class']
 
     loc_coldict = {}
     for colname in loc_one_hot_col_name:
