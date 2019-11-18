@@ -22,7 +22,7 @@ if __name__ == '__main__':
     arg = parser.add_argument
     arg('--run_root', default='/Users/yefeichen/Database/location_recommender_system/')
     arg('--ls_card',default='location_scorecard_191113.csv')
-    arg('--app_date',default='_191114_add')
+    arg('--app_date',default='_191114')
     arg('--ratio',type=float,default=0.8)
     args = parser.parse_args()
 
@@ -30,6 +30,7 @@ if __name__ == '__main__':
     cfile = ['dnb_pa.csv']
     app_date = args.app_date
     apps = app_date + '.csv'
+    appsadd = app_date+'_add'+'.csv'
     lfile = args.ls_card  # It is fixed as input
     clfile = ['PA']
     clfile = [c + apps for c in clfile]
@@ -171,9 +172,9 @@ if __name__ == '__main__':
     # print('Final merge...')
     train_test_val_pair = pd.concat(train_test_val_pairs)
 
-    train_test_val_pair.to_csv(pjoin(datapath, 'train_val_test_location_company_82split' + apps))
-    dat_comp_pd.to_csv(pjoin(datapath, 'company_feat' + apps))
-    dat_loc_pd.to_csv(pjoin(datapath, 'location_feat' + apps))
+    train_test_val_pair.to_csv(pjoin(datapath, 'train_val_test_location_company_82split' + appsadd))
+    dat_comp_pd.to_csv(pjoin(datapath, 'company_feat' + appsadd))
+    dat_loc_pd.to_csv(pjoin(datapath, 'location_feat' + appsadd))
     print('All Done')
 
     print(dat_comp_pd.shape,dat_loc_pd.shape)

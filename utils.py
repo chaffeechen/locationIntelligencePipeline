@@ -375,13 +375,13 @@ class sub_rec_condition(object):
             self.reason.append(reason)
         return self
 
-    def exfiltering(self, cond_col, percentile=0.6, reason='many things'):
+    def exfiltering(self, cond_col, percentile=0.6, reason='many things',reason_col_name='reason'):
         self.cond_col.append(cond_col)
         val = self.loc_feat[[cond_col]].quantile(q=percentile).item()
         if max(val, 10):
             sub_loc = self.loc_feat[self.loc_feat[cond_col] >= val].reset_index(drop=True)
-        sub_loc['reason'] = reason
-        return sub_loc[['atlas_location_uuid', 'reason']]
+        sub_loc[reason_col_name] = reason
+        return sub_loc[['atlas_location_uuid', reason_col_name]]
 
     def end(self):
         return self.loc_feat
