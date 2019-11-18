@@ -287,3 +287,137 @@ def apply_dummy(coldict:dict,data):
     #array to pd
     pd_new = pd.DataFrame(data=result,columns=dummy_name)
     return pd_new
+
+#=======================================================================================================================
+#=======================================================================================================================
+# get_sub_recommend_reason_after_similarity
+#=======================================================================================================================
+#=======================================================================================================================
+def generate_loc_type(comp_feat, comp_loc, matching_col):
+    # matching_col = 'major_industry_category'
+    comp_type = comp_feat[['duns_number', matching_col]]
+    comp_type_location = pd.merge(comp_type, comp_loc[['duns_number', 'atlas_location_uuid']], on='duns_number',
+                                  how='inner')
+
+    loc_type = comp_type_location.groupby(['atlas_location_uuid', matching_col]).first().reset_index()[
+        ['atlas_location_uuid', matching_col]]
+    return loc_type
+
+
+class sub_rec_similar_company(object):
+    def __init__(self, comp_feat, comp_loc, matching_col,reason_col_name='reason'):
+        """
+        comp_feat: original company information
+        comp_loc: company-location affinities of a certain city
+        matching_col = 'major_industry_category' big category
+                    or 'primary_sic_2_digit' more detailed category
+        """
+        self.comp_feat = comp_feat
+        self.comp_loc = comp_loc
+        self.matching_col = matching_col
+        self.reason_col_name = reason_col_name
+        self.loc_type = generate_loc_type(comp_feat, comp_loc, matching_col)
+
+    def get_candidate_location_for_company(self, query_comp_feat,reason='similar company inside'):
+        sub_pairs = pd.merge(query_comp_feat[['duns_number', self.matching_col]], self.loc_type, on=self.matching_col,
+                             how='left', suffixes=['', '_right'])
+        sub_pairs = sub_pairs[sub_pairs['atlas_location_uuid'].notnull()]#sometimes a company may have no location to recommend
+        sub_pairs[self.reason_col_name] = reason
+        return sub_pairs
+
+
+class global_filter(object):
+    def __init__(self, loc_feat):
+        self.loc_feat = loc_feat
+
+    def filtering(self, key_column, percentile=0.2, mode='gt'):
+        val = self.loc_feat[[key_column]].quantile(q=percentile).item()
+        if mode == 'gt':
+            sub_loc = self.loc_feat[self.loc_feat[key_column] >= val]
+        else:
+            sub_loc = self.loc_feat[self.loc_feat[key_column] <= val]
+
+        self.loc_feat = sub_loc.reset_index(drop=True)
+        return self
+
+    def city_filter(self, city_name, key_column='city'):
+        self.loc_feat = self.loc_feat[self.loc_feat[key_column] == city_name].reset_index(drop=True)
+        return self
+
+    def exfiltering(self, loc_feat, key_column, percentile=0.2, mode='gt'):
+        val = loc_feat[[key_column]].quantile(q=percentile).item()
+        if mode == 'gt':
+            sub_loc = self.loc_feat[self.loc_feat[key_column] >= val]
+        else:
+            sub_loc = self.loc_feat[self.loc_feat[key_column] <= val]
+
+        return sub_loc.reset_index(drop=True)
+
+    def end(self):
+        return self.loc_feat
+
+
+class sub_rec_condition(object):
+    def __init__(self, loc_feat):
+        """
+        comp_loc: company-location affinities of a certain city
+        cond_col = column of location used for filtering
+        """
+        self.loc_feat = loc_feat
+        self.cond_col = []
+        self.reason = []
+
+    def filtering(self, cond_col, percentile=0.5, reason='many things'):
+        self.cond_col.append(cond_col)
+        val = self.loc_feat[[cond_col]].quantile(q=percentile).item()
+        if max(val, 10):
+            self.loc_feat = self.loc_feat[self.loc_feat[cond_col] >= val].reset_index(drop=True)
+            self.reason.append(reason)
+        return self
+
+    def exfiltering(self, cond_col, percentile=0.6, reason='many things'):
+        self.cond_col.append(cond_col)
+        val = self.loc_feat[[cond_col]].quantile(q=percentile).item()
+        if max(val, 10):
+            sub_loc = self.loc_feat[self.loc_feat[cond_col] >= val].reset_index(drop=True)
+        sub_loc['reason'] = reason
+        return sub_loc[['atlas_location_uuid', 'reason']]
+
+    def end(self):
+        return self.loc_feat
+
+#======================================================================================================================
+def ab(df):
+    return ','.join(df.values)
+
+
+def merge_rec_reason_rowise(sub_pairs, group_cols: list, merge_col: str):
+    return sub_pairs.groupby(group_cols)[merge_col].apply(ab).reset_index()
+
+
+def merge_rec_reason_colwise(sub_pairs, cols=['reason1', 'reason2'],dst_col = 'reason',sep=','):
+    sub_pairs[dst_col] = sub_pairs[cols[0]].str.cat(sub_pairs[cols[1]], sep=sep)
+    return sub_pairs
+#======================================================================================================================
+
+def list2json(x):
+    x = str(x)
+    k = ''
+    ltx = x.split(',')
+    for item in ltx:
+        if k != '':
+            if item != '':
+                k = k + ',' + "\"" + item + "\""
+            else:
+                pass
+        else:
+            if item != '':
+                k = "\""+item+"\""
+            else:
+                pass
+    k = '['+k+']'
+    return k
+
+def reason_json_format(df,col_name:str='reason'):
+    df[col_name] = df[col_name].apply(lambda x: '{\"reasons\":' + list2json(x) + '}')
+    return df
