@@ -4,6 +4,7 @@ import pickle
 import os
 from sklearn.preprocessing import normalize
 from sklearn.preprocessing import OneHotEncoder
+from enum import Enum
 
 pjoin = os.path.join
 
@@ -421,3 +422,115 @@ def list2json(x):
 def reason_json_format(df,col_name:str='reason'):
     df[col_name] = df[col_name].apply(lambda x: '{\"reasons\":' + list2json(x) + '}')
     return df
+
+#======================================================================================================================
+#======================================================================================================================
+# get_dl_sub_recommend_reason
+#======================================================================================================================
+#======================================================================================================================
+class featsrc(Enum):
+    company = 0
+    location = 1
+    region = 2
+
+
+class feature_translate(object):
+    def __init__(self):
+        self.col2phs = {}
+        self.init_dict()
+
+    def init_dict(self):
+        # company
+        self.col2phs['emp_here'] = (featsrc.company, 'local employee number')
+        self.col2phs['emp_here_range'] = (featsrc.company, 'local employee number')
+        self.col2phs['emp_total'] = (featsrc.company, 'total employee number')
+        self.col2phs['sales_volume_us'] = (featsrc.company, 'sales volume')
+        self.col2phs['location_type'] = (featsrc.company, 'type(Single,Branch,HQ)')
+        self.col2phs['square_footage'] = (featsrc.company, 'expected square footage')
+        self.col2phs['primary_sic_2'] = (featsrc.company, 'industry type')
+        # building
+        self.col2phs['score_predicted_eo'] = (featsrc.location, 'eo')
+        self.col2phs['building_class'] = (featsrc.location, 'class')
+        # region
+        self.col2phs['num_retail_stores'] = (featsrc.region, 'shop amenities')
+        self.col2phs['num_doctor_offices'] = (featsrc.region, 'health amenities')
+        self.col2phs['num_eating_places'] = (featsrc.region, 'lunch amenities')
+        self.col2phs['num_drinking_places'] = (featsrc.region, 'relaxing amenities')
+        self.col2phs['num_hotels'] = (featsrc.region, 'trip amenities')
+        self.col2phs['num_fitness_gyms'] = (featsrc.region, 'gym amenities')
+        self.col2phs['population_density'] = (featsrc.region, 'population')
+        self.col2phs['pct_female_population'] = (featsrc.region, 'population structure')
+        self.col2phs['median_age'] = (featsrc.region, 'population environment')
+        self.col2phs['income_per_capita'] = (featsrc.region, 'income level')
+        self.col2phs['pct_masters_degree'] = (featsrc.region, 'education degree')
+        self.col2phs['walk_score'] = (featsrc.region, 'walking amenities')
+        self.col2phs['bike_score'] = (featsrc.region, 'biking amenities')
+
+    def merge_lst(self, lst: list, pre_phs='', post_phs=''):
+        phs = ''
+        #         print(lst)
+        for c in lst:
+            phs = phs + c + ', '
+        if lst:
+            phs = phs[:-2]  # get rid of last ', '
+        # print(phs)
+        if pre_phs:
+            pre_phs = pre_phs + ' '
+        if post_phs:
+            post_phs = ' ' + post_phs
+        return pre_phs + phs + post_phs
+
+    def merge_phs(self, lst: list):
+        phs = ''
+        _lst = [p for p in lst if p]
+        for p in _lst:
+            if phs:
+                phs = phs + '; ' + p
+            else:
+                phs = p
+        return phs
+
+    def make_sense(self, input_lst):
+        if isinstance(input_lst, list):
+            pass
+        elif isinstance(input_lst, str):
+            input_lst = [e for e in input_lst.split(',') if e]
+        else:
+            return 'Err:input type'
+
+        # print(len(input_lst))
+        #in case of irrelavant data
+        input_lst = [self.col2phs[key] for key in input_lst if key in self.col2phs.keys()]
+
+        comp_lst, loc_lst, region_lst = [], [], []
+
+        for key in input_lst:
+            #             print(key)
+            if key in self.col2phs.keys():
+                phss = self.col2phs[key]
+                if phss[0] == featsrc.company:
+                    comp_lst.append(phss[1])
+                elif phss[0] == featsrc.location:
+                    loc_lst.append(phss[1])
+                elif phss[0] == featsrc.region:
+                    region_lst.append(phss[1])
+
+                    #         print(comp_lst,loc_lst,region_lst)
+
+        if comp_lst:  # not empty assert
+            comp_phs = self.merge_lst(comp_lst, pre_phs='', post_phs='of your company')
+        else:
+            comp_phs = ''
+
+        if loc_lst:
+            loc_phs = self.merge_lst(loc_lst, pre_phs='', post_phs='of the building')
+        else:
+            loc_phs = ''
+
+        if region_lst:
+            region_phs = self.merge_lst(region_lst, pre_phs='', post_phs='of the region')
+        else:
+            region_phs = ''
+
+        # print(comp_phs,loc_phs,region_phs)
+        return 'According to the ' + self.merge_phs([comp_phs, loc_phs, region_phs])
