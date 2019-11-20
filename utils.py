@@ -509,6 +509,8 @@ class feature_translate(object):
         if isinstance(input_lst, list):
             pass
         elif isinstance(input_lst, str):
+            input_lst = input_lst.replace('[','',1)
+            input_lst = input_lst.replace(']','',1)
             input_lst = [e for e in input_lst.split(',') if e]
         else:
             return 'Err:input type'

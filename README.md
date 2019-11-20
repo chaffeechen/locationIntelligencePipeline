@@ -134,7 +134,9 @@
 		
 **Outputs**:
 					
-	'dlsub_sampled_ww_PA_similarity' + apps: Column named 'note' stored the reason. It is used for unploading.
+	'dlsub_sampled_ww_PA_similarity' + apps: Column named 'note' stored the reason. 
+	
+	It is used for unploading.
 
 
 
