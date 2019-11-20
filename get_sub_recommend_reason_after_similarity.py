@@ -42,7 +42,7 @@ if __name__ == '__main__':
     else:
         sam = ''
 
-    ssfile = [ sam+ww+c.replace('args.apps','')+'_similarity'+args.apps for c in clfile ]
+    ssfile = [ sam+ww+c.replace(args.apps,'')+'_similarity'+args.apps for c in clfile ]
     # ssfile = ['ww_PA_similarity_20191113.csv','ww_SF_similarity_20191113.csv','ww_SJ_similarity_20191113.csv',
     #           'ww_LA_similarity_20191113.csv','ww_NY_similarity_20191113.csv']
     dlsub_ssfile = ['dlsub_'+c for c in ssfile]
@@ -113,6 +113,7 @@ if __name__ == '__main__':
         dlsubdat = pd.read_csv(pjoin(datapath,dlsub_ssfile[ind_city]),index_col=0)
         dlsubdat[reason3] = dlsubdat.apply(lambda row:featTranslator.make_sense(row['merged_feat']),axis=1)
         dlsubdat = dlsubdat[['atlas_location_uuid','duns_number',reason3]]
+        print('>> pairs: %d' % len(dlsubdat) )
 
         #### attach these with scores
         topk = 300
@@ -131,7 +132,7 @@ if __name__ == '__main__':
 
         sample_sspd = sample_sspd[sample_sspd[reason1].notnull() | sample_sspd[reason2].notnull()]
         sample_sspd[[reason1, reason2]] = sample_sspd[[reason1, reason2]].fillna('')
-        sample_sspd = merge_rec_reason_colwise(sample_sspd, cols=[reason1, reason2], dst_col='reason')
+        sample_sspd = merge_rec_reason_colwise(sample_sspd, cols=[reason1, reason2], dst_col='reason',sep='#')
 
         #merge model based reason
         sample_sspd = pd.merge(sample_sspd,dlsubdat, on=['atlas_location_uuid', 'duns_number'], how='left',
@@ -139,9 +140,11 @@ if __name__ == '__main__':
 
         sample_sspd = sample_sspd[sample_sspd['reason'].notnull() | sample_sspd[reason3].notnull()]
         sample_sspd[['reason', reason3]] = sample_sspd[['reason', reason3]].fillna('')
-        sample_sspd = merge_rec_reason_colwise(sample_sspd, cols=['reason', reason3], dst_col='reason')
+        sample_sspd = merge_rec_reason_colwise(sample_sspd, cols=['reason', reason3], dst_col='reason',sep='#')
 
-        sample_sspd = reason_json_format(sample_sspd, col_name='reason')
+        print('json format transforming...')
+
+        sample_sspd = reason_json_format(sample_sspd, col_name='reason',sep='#')
 
         sample_sspd['duns_number'] = sample_sspd['duns_number'].astype(int)
         sample_sspd = sample_sspd.rename(columns={
@@ -159,6 +162,7 @@ if __name__ == '__main__':
         # sspd[sspd['reason_right'].isnull()]
 
 ##merging files
+print('merging results')
 dfs = []
 for filename in ssfile:
     dfs.append(pd.read_csv('sub_'+filename,index_col=0))

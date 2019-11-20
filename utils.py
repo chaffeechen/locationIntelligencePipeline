@@ -401,10 +401,10 @@ def merge_rec_reason_colwise(sub_pairs, cols=['reason1', 'reason2'],dst_col = 'r
     return sub_pairs
 #======================================================================================================================
 
-def list2json(x):
+def list2json(x,sep=','):
     x = str(x)
     k = ''
-    ltx = x.split(',')
+    ltx = x.split(sep)
     for item in ltx:
         if k != '':
             if item != '':
@@ -419,8 +419,8 @@ def list2json(x):
     k = '['+k+']'
     return k
 
-def reason_json_format(df,col_name:str='reason'):
-    df[col_name] = df[col_name].apply(lambda x: '{\"reasons\":' + list2json(x) + '}')
+def reason_json_format(df,col_name:str='reason',sep=','):
+    df[col_name] = df[col_name].apply(lambda x: '{\"reasons\":' + list2json(x,sep) + '}')
     return df
 
 #======================================================================================================================
@@ -500,7 +500,7 @@ class feature_translate(object):
 
         # print(len(input_lst))
         #in case of irrelavant data
-        input_lst = [self.col2phs[key] for key in input_lst if key in self.col2phs.keys()]
+        # input_lst = [self.col2phs[key] for key in input_lst if key in self.col2phs.keys()]
 
         comp_lst, loc_lst, region_lst = [], [], []
 
@@ -533,4 +533,8 @@ class feature_translate(object):
             region_phs = ''
 
         # print(comp_phs,loc_phs,region_phs)
-        return 'According to the ' + self.merge_phs([comp_phs, loc_phs, region_phs])
+        final_phs = self.merge_phs([comp_phs, loc_phs, region_phs])
+        if final_phs:
+            return 'According to the ' + final_phs
+        else:
+            return ''
