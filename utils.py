@@ -466,6 +466,21 @@ class feature_translate(object):
         self.col2phs['walk_score'] = (featsrc.region, 'walking amenities')
         self.col2phs['bike_score'] = (featsrc.region, 'biking amenities')
 
+    def getItem(self,gvkey):
+        #precision matching
+        if gvkey in self.col2phs.keys():
+            return {'status':True,
+                        'key':gvkey,
+                        'item':self.col2phs[gvkey]}
+        #rough matching
+        for key in self.col2phs.keys():
+            if gvkey.startswith(key):
+                return {'status':True,
+                        'key':key,
+                        'item':self.col2phs[key]}
+
+        return {'status':False}
+
     def merge_lst(self, lst: list, pre_phs='', post_phs=''):
         phs = ''
         #         print(lst)
@@ -506,8 +521,10 @@ class feature_translate(object):
 
         for key in input_lst:
             #             print(key)
-            if key in self.col2phs.keys():
-                phss = self.col2phs[key]
+            ret = self.getItem(key)
+
+            if ret['status']:
+                phss = ret['item']
                 if phss[0] == featsrc.company:
                     comp_lst.append(phss[1])
                 elif phss[0] == featsrc.location:
