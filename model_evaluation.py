@@ -23,6 +23,7 @@ if __name__ == '__main__':
     arg('--run_root', default='/Users/yefeichen/Database/location_recommender_system/')
     arg('--app_date',default='_191113')
     arg('--prev_name',type=str,default='sampled_ww_')
+    arg('--slice_demo',action='store_true',help='set true if you want to see some slice of the details')
     args = parser.parse_args()
 
     datapath = args.run_root
@@ -63,11 +64,14 @@ if __name__ == '__main__':
 
         distpd = pd.DataFrame(dist, columns=['dist'])
 
-        pred_gr_dat2 = pd.concat([pred_gr_dat[['atlas_location_uuid', 'duns_number_prd', 'duns_number_grd']], distpd],
+        pred_gr_dat2 = pd.concat([pred_gr_dat[['atlas_location_uuid', 'duns_number_prd', 'duns_number_grd','similarity']], distpd],
                                  axis=1)
-        #in case of the identical company inside
+        # in case of the identical company inside
         pred_gr_dat2.loc[pred_gr_dat2['dist'] < 1e-12, 'dist'] = 1
-        result = pred_gr_dat2.groupby(['atlas_location_uuid', 'duns_number_prd'])['dist'].min().reset_index()
+        # result = pred_gr_dat2.groupby(['atlas_location_uuid', 'duns_number_prd'])['dist'].min().reset_index()
+        # in order to preserve other columns in the result
+        result = pred_gr_dat2.loc[
+            pred_gr_dat2.groupby(['atlas_location_uuid', 'duns_number_prd'])['dist'].idxmin()].reset_index(drop=True)
 
         num_location = len(result.groupby('atlas_location_uuid').first().reset_index())
 
@@ -78,3 +82,18 @@ if __name__ == '__main__':
         print('# min-dist of each queries:')
         print(result['dist'].describe())
         print('==================================================')
+
+        if args.slice_demo:
+            src_comp_dat = pd.read_csv(pjoin(datapath, cfile[ind_city]))
+            result1 = result.merge(src_comp_dat, left_on='duns_number_prd', right_on='duns_number', how='left',
+                                   suffixes=['', '_prd'])
+            result2 = result.merge(src_comp_dat, left_on='duns_number_grd', right_on='duns_number', how='left',
+                                   suffixes=['', '_grd'])
+
+            result1['tag'] = 'prd'
+            result2['tag'] = 'grd'
+
+            result3 = pd.concat([result1, result2], axis=0).sort_values(
+                by=['atlas_location_uuid', 'duns_number_prd']).reset_index(drop=True)
+
+            result3.to_csv('eval_details_'+ssfile[ind_city])
