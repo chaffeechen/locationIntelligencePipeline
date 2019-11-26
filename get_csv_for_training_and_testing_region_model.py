@@ -23,6 +23,7 @@ if __name__ == '__main__':
     arg('--run_root', default='/Users/yefeichen/Database/location_recommender_system/')
     arg('--app_date',default='_191114')
     arg('--ratio',default=0.8)
+    arg('--test_round', type=int, default=4)
 
     args = parser.parse_args()
     max_K = 20
@@ -66,72 +67,77 @@ if __name__ == '__main__':
 
         #operate on ttdats
         cldat = cldat[cldat['fold'] == 2]
-        fn = lambda obj: obj.loc[np.random.choice(obj.index, 1, True),:]
-        tbA = cldat.groupby('atlas_location_uuid').apply(fn).reset_index(drop=True)[['duns_number', 'atlas_location_uuid']]
-        print('1.len of tbA %d:'%len(tbA))
-        fn = lambda obj: obj.loc[np.random.choice(obj.index, max_K, True),:]
-        tbB = cldat.groupby('atlas_location_uuid').apply(fn).reset_index(drop=True)[['duns_number', 'atlas_location_uuid']]
-        print('1.len of tbB %d'%len(tbB))
 
-        ###======================Pos=============================###
-        tbA['mk'] = 'A'
-        tbB = tbB.merge(tbA,on=['duns_number','atlas_location_uuid'],how='left',suffixes=['','_right'])
-        tbB = tbB[tbB['mk'].isnull()]
-        print('2.len of tbB not included in tbA %d'%len(tbB))
-        #we need to full fill the data
-        tbB = tbB.groupby('atlas_location_uuid').apply(fn).reset_index(drop=True)[['duns_number', 'atlas_location_uuid']]
-        tbB['mk'] = 'B'
-        print('3.len of tbB full filled again %d'%len(tbB))
-        #in case tbB cut some locations from tbA, lets shrink tbA
-        tblocB = tbB.groupby('atlas_location_uuid').first().reset_index()
-        print('4.len of locations in tbB %d'%len(tblocB))
-        tbA = tbA.merge(tblocB,on='atlas_location_uuid',how='left',suffixes=['','_right'])
-        tbA = tbA[tbA['mk_right'].notnull()][['duns_number', 'atlas_location_uuid','mk']].reset_index(drop=True)
-        print('4.len of tbA with common locations of tbB %d'%len(tbA))
+        print('inner loop for test expanding...')
+        for i in range(args.test_round):
+            print('###Round %d ###'%i)
+            fn = lambda obj: obj.loc[np.random.choice(obj.index, 1, True),:]
+            tbA = cldat.groupby('atlas_location_uuid').apply(fn).reset_index(drop=True)[['duns_number', 'atlas_location_uuid']]
+            print('1.len of tbA %d:'%len(tbA))
+            fn = lambda obj: obj.loc[np.random.choice(obj.index, max_K, True),:]
+            tbB = cldat.groupby('atlas_location_uuid').apply(fn).reset_index(drop=True)[['duns_number', 'atlas_location_uuid']]
+            print('1.len of tbB %d'%len(tbB))
 
-        ###======================Neg=============================###
-        tbAA = pd.concat([tbA,tbA.sample(frac=1).reset_index()\
-                   .rename(columns={'duns_number':'duns_number_n','atlas_location_uuid':'atlas_location_uuid_n','mk':'mk_n'})]
-                  ,axis=1)
-        print('5.len of negpair %d'%len(tbAA))
-        tbAA = tbAA.merge(cldat,\
-                   left_on=['duns_number_n','atlas_location_uuid'],right_on=['duns_number','atlas_location_uuid'],\
-                   how='left', suffixes = ['','_right'])
 
-        tbC = tbAA[tbAA['duns_number_right'].isnull()][['duns_number_n','atlas_location_uuid']]\
-                .rename(columns={'duns_number_n':'duns_number'})
-        print('6.len of neg data %d'%len(tbC))
+            ###======================Pos=============================###
+            tbA['mk'] = 'A'
+            tbB = tbB.merge(tbA,on=['duns_number','atlas_location_uuid'],how='left',suffixes=['','_right'])
+            tbB = tbB[tbB['mk'].isnull()]
+            print('2.len of tbB not included in tbA %d'%len(tbB))
+            #we need to full fill the data
+            tbB = tbB.groupby('atlas_location_uuid').apply(fn).reset_index(drop=True)[['duns_number', 'atlas_location_uuid']]
+            tbB['mk'] = 'B'
+            print('3.len of tbB full filled again %d'%len(tbB))
+            #in case tbB cut some locations from tbA, lets shrink tbA
+            tblocB = tbB.groupby('atlas_location_uuid').first().reset_index()
+            print('4.len of locations in tbB %d'%len(tblocB))
+            tbA = tbA.merge(tblocB,on='atlas_location_uuid',how='left',suffixes=['','_right'])
+            tbA = tbA[tbA['mk_right'].notnull()][['duns_number', 'atlas_location_uuid','mk']].reset_index(drop=True)
+            print('4.len of tbA with common locations of tbB %d'%len(tbA))
 
-        #in case tbC cut some locations from tbA and tbB
-        tbC['mk'] = 'C'
-        tblocC = tbC.groupby('atlas_location_uuid').first().reset_index()
-        print('6.locations in neg data %d'%len(tblocC))
-        tbA = tbA.merge(tblocC,on='atlas_location_uuid',how='left',suffixes=['','_right'])
-        tbA = tbA[tbA['mk_right'].notnull()][['duns_number', 'atlas_location_uuid','mk']].reset_index(drop=True)
-        print('final tbA len %d'%len(tbA))
+            ###======================Neg=============================###
+            tbAA = pd.concat([tbA,tbA.sample(frac=1).reset_index()\
+                       .rename(columns={'duns_number':'duns_number_n','atlas_location_uuid':'atlas_location_uuid_n','mk':'mk_n'})]
+                      ,axis=1)
+            print('5.len of negpair %d'%len(tbAA))
+            tbAA = tbAA.merge(cldat,\
+                       left_on=['duns_number_n','atlas_location_uuid'],right_on=['duns_number','atlas_location_uuid'],\
+                       how='left', suffixes = ['','_right'])
 
-        tbB = tbB.merge(tblocC,on='atlas_location_uuid',how='left',suffixes=['','_right'])
-        tbB = tbB[tbB['mk_right'].notnull()][['duns_number', 'atlas_location_uuid','mk']].reset_index(drop=True)
-        print('final tbB len %d'%len(tbB))
+            tbC = tbAA[tbAA['duns_number_right'].isnull()][['duns_number_n','atlas_location_uuid']]\
+                    .rename(columns={'duns_number_n':'duns_number'})
+            print('6.len of neg data %d'%len(tbC))
 
-        tbA = tbA.sort_values(by='atlas_location_uuid')
-        tbB = tbB.sort_values(by='atlas_location_uuid')
-        tbC = tbC.sort_values(by='atlas_location_uuid')
+            #in case tbC cut some locations from tbA and tbB
+            tbC['mk'] = 'C'
+            tblocC = tbC.groupby('atlas_location_uuid').first().reset_index()
+            print('6.locations in neg data %d'%len(tblocC))
+            tbA = tbA.merge(tblocC,on='atlas_location_uuid',how='left',suffixes=['','_right'])
+            tbA = tbA[tbA['mk_right'].notnull()][['duns_number', 'atlas_location_uuid','mk']].reset_index(drop=True)
+            print('final tbA len %d'%len(tbA))
 
-        assert(len(tbA)==len(tbC) and len(tbB)==len(tbA)*max_K)
+            tbB = tbB.merge(tblocC,on='atlas_location_uuid',how='left',suffixes=['','_right'])
+            tbB = tbB[tbB['mk_right'].notnull()][['duns_number', 'atlas_location_uuid','mk']].reset_index(drop=True)
+            print('final tbB len %d'%len(tbB))
 
-        result = pd.concat([tbA, tbB, tbC], axis=0).reset_index(drop=True)
-        result['city'] = ind_city
-        print(len(result))
+            tbA = tbA.sort_values(by='atlas_location_uuid')
+            tbB = tbB.sort_values(by='atlas_location_uuid')
+            tbC = tbC.sort_values(by='atlas_location_uuid')
 
-        ttdats.append(result)
+            assert(len(tbA)==len(tbC) and len(tbB)==len(tbA)*max_K)
+
+            result = pd.concat([tbA, tbB, tbC], axis=0).reset_index(drop=True)
+            result['city'] = ind_city
+            print(len(result))
+
+            ttdats.append(result)
 
 
     trdats = pd.concat(trdats,axis=0).reset_index(drop=True)
     ttdats = pd.concat(ttdats,axis=0).reset_index(drop=True)
 
-    trdats.to_csv('region_train.csv')
-    ttdats.to_csv('region_test.csv')
+    trdats.to_csv('region_train'+apps)
+    ttdats.to_csv('region_test'+apps)
 
 
 
