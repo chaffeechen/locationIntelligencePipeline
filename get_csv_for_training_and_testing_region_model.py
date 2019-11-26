@@ -47,8 +47,9 @@ if __name__ == '__main__':
         #unique location list
         locdat = cldat.groupby('atlas_location_uuid').first().reset_index()
         trlocdat = locdat.sample(frac=args.ratio).reset_index(drop=True)
+        trlocdat['fold'] = 0
         ttlocdat = locdat.merge(trlocdat, on=['atlas_location_uuid'], how='left', suffixes=['', '_right'])
-        ttlocdat = ttlocdat[ttlocdat['geo_distance_right'].isnull()].reset_index()
+        ttlocdat = ttlocdat[ttlocdat['fold'].isnull()].reset_index()
         trlocdat = trlocdat[['atlas_location_uuid']]
         ttlocdat = ttlocdat[['atlas_location_uuid']]
         print('location for train: %d, for test: %d '%(len(trlocdat),len(ttlocdat)))
