@@ -170,9 +170,9 @@ def comp_dat_process(dat, one_hot_col_name, cont_col_name , spec_col_name ,do_du
     max_col(cont_dat, 'emp_here', 1)
 
     if do_dummy:
-        res_dat = dat[['duns_number']].join([cont_dat, spec_dat, dum_dat], how='left')
+        res_dat = dat[['duns_number','city']].join([cont_dat, spec_dat, dum_dat], how='left')
     else:
-        res_dat = dat[['duns_number']].join([cont_dat, spec_dat], how='left')
+        res_dat = dat[['duns_number','city']].join([cont_dat, spec_dat], how='left')
 
     if do_dummy:
         assert (len(res_dat) == len(dum_dat))

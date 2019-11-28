@@ -40,6 +40,7 @@ if __name__ == '__main__':
                     'atlas_location_uuid',
                     'longitude_loc',
                     'latitude_loc',
+                    'city',
                     'label']
     cont_col_nameC = ['emp_here', 'emp_total', 'sales_volume_us', 'square_footage', 'emp_here_range']
     spec_col_nameC = 'emp_here_range'
@@ -107,6 +108,7 @@ if __name__ == '__main__':
         pdlls.append(pdll)
 
         # company feature
+        pdc['city'] = ind_city
         pdccs.append(pdc)
 
     # for loop end
@@ -183,6 +185,9 @@ if __name__ == '__main__':
     save_obj(loc_norm_param, pjoin(datapath, 'loc_feat_norm_param' + app_date))
 
     dat_comp_pd = pd.DataFrame(data=X_comp, columns=y_comp_name + c_comp_name + d_comp_name)
+    dat_comp_pd = pd.concat([dat_comp_pd,proc_pdc[['city']]], axis=1)
+
+
     dat_loc_pd = pd.DataFrame(data=X_loc, columns=y_loc_name + c_loc_name + d_loc_name)
 
     print(dat_comp_pd.to_numpy().mean())
