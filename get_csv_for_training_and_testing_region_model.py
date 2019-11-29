@@ -24,9 +24,10 @@ if __name__ == '__main__':
     arg('--app_date',default='_191114')
     arg('--ratio',default=0.8)
     arg('--test_round', type=int, default=4)
+    arg('--maxK',type=int,default=50)
 
     args = parser.parse_args()
-    max_K = 20
+    max_K = args.maxK
 
     apps = args.app_date + '.csv'
 
