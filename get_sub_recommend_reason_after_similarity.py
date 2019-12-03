@@ -130,7 +130,7 @@ if __name__ == '__main__':
                           'population_density', 'pct_female_population', 'median_age', 'income_per_capita',
                           'pct_masters_degree', 'walk_score', 'bike_score']
         dummy_col_nameL = ['building_class']
-        recall_com4 = sub_rec_similar_location(cont_col_name=cont_col_nameL, dummy_col_name=dummy_col_nameL)
+        recall_com4 = sub_rec_similar_location(cont_col_name=cont_col_nameL, dummy_col_name=dummy_col_nameL,reason_col_name=reason4)
         loc_comp_loc = recall_com4.get_reason(sspd = sspd, comp_loc=comp_loc, loc_feat=loc_feat, reason='location similar in')
 
 
