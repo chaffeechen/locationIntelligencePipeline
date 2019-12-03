@@ -73,9 +73,10 @@ if __name__ == '__main__':
             sub_comp_loc = pd.merge(comp_loc, sub_loc_feat[['atlas_location_uuid']], on='atlas_location_uuid',
                                     how='inner', suffixes=['', '_right'])
 
-        reason1 = 'reason_similar_based'
+        reason1 = 'reason_similar_company'
         reason2 = 'reason_location_based'
         reason3 = 'reason_model_based'
+        reason4 = 'reason_similar_location'
         print('Reasoning')
         # Reason 1:
         print('1. Customized Reason')
@@ -122,6 +123,17 @@ if __name__ == '__main__':
         sample_sspd = sspd.groupby('atlas_location_uuid').apply(lambda x: x.nlargest(topk, ['similarity'])).reset_index(
             drop=True)
 
+        print('4. Similar location')
+        cont_col_nameL = ['score_predicted_eo', 'score_employer', 'num_emp_weworkcore', 'num_poi_weworkcore',
+                          'pct_wwcore_employee', 'pct_wwcore_business', 'num_retail_stores', 'num_doctor_offices',
+                          'num_eating_places', 'num_drinking_places', 'num_hotels', 'num_fitness_gyms',
+                          'population_density', 'pct_female_population', 'median_age', 'income_per_capita',
+                          'pct_masters_degree', 'walk_score', 'bike_score']
+        dummy_col_nameL = ['building_class']
+        recall_com4 = sub_rec_similar_location(cont_col_name=cont_col_nameL, dummy_col_name=dummy_col_nameL)
+        loc_comp_loc = recall_com4.get_reason(sspd = sspd, comp_loc=comp_loc, loc_feat=loc_feat, reason='location similar in')
+
+
         print(len(sample_sspd))
         #merge location base reason
         sample_sspd = pd.merge(sample_sspd, sub_loc_recall[['atlas_location_uuid', reason2]], on='atlas_location_uuid',
@@ -141,6 +153,14 @@ if __name__ == '__main__':
         sample_sspd = sample_sspd[sample_sspd['reason'].notnull() | sample_sspd[reason3].notnull()]
         sample_sspd[['reason', reason3]] = sample_sspd[['reason', reason3]].fillna('')
         sample_sspd = merge_rec_reason_colwise(sample_sspd, cols=['reason', reason3], dst_col='reason',sep='#')
+
+        #merge location similarity reason
+        sample_sspd = pd.merge(sample_sspd, loc_comp_loc, on=['atlas_location_uuid', 'duns_number'], how='left',
+                               suffixes=['', '_right'])
+
+        sample_sspd = sample_sspd[sample_sspd['reason'].notnull() | sample_sspd[reason4].notnull()]
+        sample_sspd[['reason', reason4]] = sample_sspd[['reason', reason4]].fillna('')
+        sample_sspd = merge_rec_reason_colwise(sample_sspd, cols=['reason', reason4], dst_col='reason', sep='#')
 
         print('json format transforming...')
 

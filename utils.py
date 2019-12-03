@@ -147,14 +147,14 @@ def max_col(dat, col, minval=1):
     dat[col] = dat[col].apply(lambda r: max(r, minval))
 
 
-def comp_dat_process(dat, one_hot_col_name, cont_col_name , spec_col_name ,do_dummy=True):
+def comp_dat_process(dat, one_hot_col_name, cont_col_name, spec_col_name, do_dummy=True):
     """
     pd -> company key,cont_feature,spec_feature,dum_feature
     """
     # one_hot_col_name = ['major_industry_category', 'location_type', 'primary_sic_2_digit']
     # spec_col_name = 'emp_here_range'
     # cont_col_name = ['emp_here', 'emp_total', 'sales_volume_us', 'square_footage']
-    cont_col_name = [ c for c in cont_col_name if c != spec_col_name ]
+    cont_col_name = [c for c in cont_col_name if c != spec_col_name]
 
     if do_dummy:
         print('doing one-hot...')
@@ -170,9 +170,9 @@ def comp_dat_process(dat, one_hot_col_name, cont_col_name , spec_col_name ,do_du
     max_col(cont_dat, 'emp_here', 1)
 
     if do_dummy:
-        res_dat = dat[['duns_number','city']].join([cont_dat, spec_dat, dum_dat], how='left')
+        res_dat = dat[['duns_number', 'city']].join([cont_dat, spec_dat, dum_dat], how='left')
     else:
-        res_dat = dat[['duns_number','city']].join([cont_dat, spec_dat], how='left')
+        res_dat = dat[['duns_number', 'city']].join([cont_dat, spec_dat], how='left')
 
     if do_dummy:
         assert (len(res_dat) == len(dum_dat))
@@ -181,7 +181,7 @@ def comp_dat_process(dat, one_hot_col_name, cont_col_name , spec_col_name ,do_du
     return res_dat
 
 
-def location_dat_process(dat, one_hot_col_name, cont_col_name ,do_dummy=True):
+def location_dat_process(dat, one_hot_col_name, cont_col_name, do_dummy=True):
     """
     pd -> location key,cont_feature,dum_feature
     """
@@ -246,6 +246,7 @@ def apply_para_normalize_dat(X, center, scale, axis=0):
     X = (X - center) / scale
     return X
 
+
 def normalize_dat(trX, ttX, cols=5, axis=0):
     D = trX[:, :cols]
     center = D.mean(axis=axis)
@@ -256,6 +257,7 @@ def normalize_dat(trX, ttX, cols=5, axis=0):
     trX[:, :cols] = (D - center) / scale
     ttX[:, :cols] = (ttX[:, :cols] - center) / scale
 
+
 def save_obj(obj, name):
     with open(name + '.pkl', 'wb') as f:
         pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
@@ -265,35 +267,38 @@ def load_obj(name):
     with open(name + '.pkl', 'rb') as f:
         return pickle.load(f)
 
-def transpd2np_single(featdat,cont_col_name:list,not_feat_col:list,id_col_name:list):
-    XC = featdat.loc[:,cont_col_name].to_numpy()
-    out_col = not_feat_col+cont_col_name
-    dum_col_name = [col for col in list(featdat.columns) if col not in out_col]
-    XD = featdat.loc[:,dum_col_name].to_numpy()
-    Y = featdat[id_col_name].to_numpy()
-    return XC,XD,Y,cont_col_name,dum_col_name,id_col_name
 
-def apply_dummy(coldict:dict,data):
+def transpd2np_single(featdat, cont_col_name: list, not_feat_col: list, id_col_name: list):
+    XC = featdat.loc[:, cont_col_name].to_numpy()
+    out_col = not_feat_col + cont_col_name
+    dum_col_name = [col for col in list(featdat.columns) if col not in out_col]
+    XD = featdat.loc[:, dum_col_name].to_numpy()
+    Y = featdat[id_col_name].to_numpy()
+    return XC, XD, Y, cont_col_name, dum_col_name, id_col_name
+
+
+def apply_dummy(coldict: dict, data):
     cat_list = []
     dummy_num = len(coldict)
     dummy_name = []
     for key in coldict:
-        cat_list.append(np.array(coldict[key])) #list of array for onehot engine
-        dummy_name = dummy_name + [ key+'_'+col for col in coldict[key] ] #full name of dummy col name
+        cat_list.append(np.array(coldict[key]))  # list of array for onehot engine
+        dummy_name = dummy_name + [key + '_' + col for col in coldict[key]]  # full name of dummy col name
 
-    enc = OneHotEncoder(handle_unknown='ignore',categories=cat_list)
+    enc = OneHotEncoder(handle_unknown='ignore', categories=cat_list)
 
     origin_dummy_col = [key for key in coldict]
     result = enc.fit_transform(data[origin_dummy_col]).toarray()
-    #array to pd
-    pd_new = pd.DataFrame(data=result,columns=dummy_name)
+    # array to pd
+    pd_new = pd.DataFrame(data=result, columns=dummy_name)
     return pd_new
 
-#=======================================================================================================================
-#=======================================================================================================================
+
+# =======================================================================================================================
+# =======================================================================================================================
 # get_sub_recommend_reason_after_similarity
-#=======================================================================================================================
-#=======================================================================================================================
+# =======================================================================================================================
+# =======================================================================================================================
 def generate_loc_type(comp_feat, comp_loc, matching_col):
     # matching_col = 'major_industry_category'
     comp_type = comp_feat[['duns_number', matching_col]]
@@ -306,7 +311,7 @@ def generate_loc_type(comp_feat, comp_loc, matching_col):
 
 
 class sub_rec_similar_company(object):
-    def __init__(self, comp_feat, comp_loc, matching_col,reason_col_name='reason'):
+    def __init__(self, comp_feat, comp_loc, matching_col, reason_col_name='reason'):
         """
         comp_feat: original company information
         comp_loc: company-location affinities of a certain city
@@ -319,10 +324,11 @@ class sub_rec_similar_company(object):
         self.reason_col_name = reason_col_name
         self.loc_type = generate_loc_type(comp_feat, comp_loc, matching_col)
 
-    def get_candidate_location_for_company(self, query_comp_feat,reason='similar company inside'):
+    def get_candidate_location_for_company(self, query_comp_feat, reason='similar company inside'):
         sub_pairs = pd.merge(query_comp_feat[['duns_number', self.matching_col]], self.loc_type, on=self.matching_col,
                              how='left', suffixes=['', '_right'])
-        sub_pairs = sub_pairs[sub_pairs['atlas_location_uuid'].notnull()]#sometimes a company may have no location to recommend
+        sub_pairs = sub_pairs[
+            sub_pairs['atlas_location_uuid'].notnull()]  # sometimes a company may have no location to recommend
         sub_pairs[self.reason_col_name] = reason
         return sub_pairs
 
@@ -376,7 +382,7 @@ class sub_rec_condition(object):
             self.reason.append(reason)
         return self
 
-    def exfiltering(self, cond_col, percentile=0.6, reason='many things',reason_col_name='reason'):
+    def exfiltering(self, cond_col, percentile=0.6, reason='many things', reason_col_name='reason'):
         self.cond_col.append(cond_col)
         val = self.loc_feat[[cond_col]].quantile(q=percentile).item()
         if max(val, 10):
@@ -387,7 +393,8 @@ class sub_rec_condition(object):
     def end(self):
         return self.loc_feat
 
-#======================================================================================================================
+
+# ======================================================================================================================
 def ab(df):
     return ','.join(df.values)
 
@@ -396,12 +403,14 @@ def merge_rec_reason_rowise(sub_pairs, group_cols: list, merge_col: str):
     return sub_pairs.groupby(group_cols)[merge_col].apply(ab).reset_index()
 
 
-def merge_rec_reason_colwise(sub_pairs, cols=['reason1', 'reason2'],dst_col = 'reason',sep=','):
+def merge_rec_reason_colwise(sub_pairs, cols=['reason1', 'reason2'], dst_col='reason', sep=','):
     sub_pairs[dst_col] = sub_pairs[cols[0]].str.cat(sub_pairs[cols[1]], sep=sep)
     return sub_pairs
-#======================================================================================================================
 
-def list2json(x,sep=','):
+
+# ======================================================================================================================
+
+def list2json(x, sep=','):
     x = str(x)
     k = ''
     ltx = x.split(sep)
@@ -413,21 +422,23 @@ def list2json(x,sep=','):
                 pass
         else:
             if item != '':
-                k = "\""+item+"\""
+                k = "\"" + item + "\""
             else:
                 pass
-    k = '['+k+']'
+    k = '[' + k + ']'
     return k
 
-def reason_json_format(df,col_name:str='reason',sep=','):
-    df[col_name] = df[col_name].apply(lambda x: '{\"reasons\":' + list2json(x,sep) + '}')
+
+def reason_json_format(df, col_name: str = 'reason', sep=','):
+    df[col_name] = df[col_name].apply(lambda x: '{\"reasons\":' + list2json(x, sep) + '}')
     return df
 
-#======================================================================================================================
-#======================================================================================================================
+
+# ======================================================================================================================
+# ======================================================================================================================
 # get_dl_sub_recommend_reason
-#======================================================================================================================
-#======================================================================================================================
+# ======================================================================================================================
+# ======================================================================================================================
 class featsrc(Enum):
     company = 0
     location = 1
@@ -466,20 +477,20 @@ class feature_translate(object):
         self.col2phs['walk_score'] = (featsrc.region, 'walking amenities')
         self.col2phs['bike_score'] = (featsrc.region, 'biking amenities')
 
-    def getItem(self,gvkey):
-        #precision matching
+    def getItem(self, gvkey):
+        # precision matching
         if gvkey in self.col2phs.keys():
-            return {'status':True,
-                        'key':gvkey,
-                        'item':self.col2phs[gvkey]}
-        #rough matching
+            return {'status': True,
+                    'key': gvkey,
+                    'item': self.col2phs[gvkey]}
+        # rough matching
         for key in self.col2phs.keys():
             if gvkey.startswith(key):
-                return {'status':True,
-                        'key':key,
-                        'item':self.col2phs[key]}
+                return {'status': True,
+                        'key': key,
+                        'item': self.col2phs[key]}
 
-        return {'status':False}
+        return {'status': False}
 
     def merge_lst(self, lst: list, pre_phs='', post_phs=''):
         phs = ''
@@ -509,14 +520,14 @@ class feature_translate(object):
         if isinstance(input_lst, list):
             pass
         elif isinstance(input_lst, str):
-            input_lst = input_lst.replace('[','',1)
-            input_lst = input_lst.replace(']','',1)
+            input_lst = input_lst.replace('[', '', 1)
+            input_lst = input_lst.replace(']', '', 1)
             input_lst = [e for e in input_lst.split(',') if e]
         else:
             return 'Err:input type'
 
         # print(len(input_lst))
-        #in case of irrelavant data
+        # in case of irrelavant data
         # input_lst = [self.col2phs[key] for key in input_lst if key in self.col2phs.keys()]
 
         comp_lst, loc_lst, region_lst = [], [], []
@@ -557,3 +568,53 @@ class feature_translate(object):
             return 'According to the ' + final_phs
         else:
             return ''
+
+# =======================================================================================================================
+# =======================================================================================================================
+# get_sub_recommend_reason_after_similarity
+# compare the recommended location and current location and find which feature is similar between them.
+# =======================================================================================================================
+# =======================================================================================================================
+class sub_rec_similar_location(object):
+    def __init__(self, cont_col_name, dummy_col_name, reason_col_name='reason'):
+        self.cont_col_name = cont_col_name
+        self.dummy_col_name = dummy_col_name
+        self.reason_col_name = reason_col_name
+        self._info = 'It will keep index of sspd'
+        self.threshold = 0.03
+
+    def get_reason(self, sspd, comp_loc, loc_feat, reason='location similar in '):
+        loc_comp_loc = sspd.merge(comp_loc, how='inner', on='duns_number', suffixes=['', '_grd']) \
+            [['atlas_location_uuid', 'duns_number', 'atlas_location_uuid_grd']]
+
+        loc_comp_loc = loc_comp_loc.merge(loc_feat, on='atlas_location_uuid', suffixes=['', '_pred'])
+        loc_comp_loc = loc_comp_loc.merge(loc_feat, left_on='atlas_location_uuid_grd', right_on='atlas_location_uuid',
+                                          suffixes=['', '_grd'])
+
+        if self.reason_col_name not in loc_comp_loc.columns:
+            loc_comp_loc[self.reason_col_name] = ''
+
+        for c in self.dummy_col_name:
+            ca = c + '_grd'
+            tmp = loc_comp_loc[['atlas_location_uuid', 'duns_number', c, ca]].dropna()
+            tmp = tmp[tmp[c] == tmp[ca]]
+            tmp['reason'] = c
+            loc_comp_loc[[self.reason_col_name]] = \
+                loc_comp_loc[self.reason_col_name].str.cat(tmp['reason'], join='left', sep=';', na_rep='')
+        for c in self.cont_col_name:
+            ca = c + '_grd'
+            tmp = loc_comp_loc[['atlas_location_uuid', 'duns_number', c, ca]].dropna()
+            tmp = tmp[abs(tmp[c] - tmp[ca]) / (tmp[ca] + 1e-5) < self.threshold]
+            tmp['reason'] = c
+            loc_comp_loc[[self.reason_col_name]] = \
+                loc_comp_loc[self.reason_col_name].str.cat(tmp['reason'], join='left', sep=';', na_rep='')
+
+        def clean(text):#problem caused by str.cat. Thus clean is a must.
+            clean_str = ';'.join([c for c in text.split(';') if c != ''])
+            return clean_str
+
+        loc_comp_loc[[self.reason_col_name]] = loc_comp_loc[self.reason_col_name].apply(lambda text: clean(text))
+        loc_comp_loc = loc_comp_loc[['atlas_location_uuid', 'duns_number', self.reason_col_name]]
+        loc_comp_loc = loc_comp_loc[loc_comp_loc[self.reason_col_name] != '']
+        loc_comp_loc[[self.reason_col_name]] = reason + ' ' + loc_comp_loc[self.reason_col_name]
+        return loc_comp_loc

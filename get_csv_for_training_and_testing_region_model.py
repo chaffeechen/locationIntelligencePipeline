@@ -25,6 +25,8 @@ if __name__ == '__main__':
     arg('--ratio',default=0.8)
     arg('--test_round', type=int, default=4)
     arg('--maxK',type=int,default=50)
+    # arg('--exp',action='store_true')
+    # arg('--exp_file',default='train_val_test_location_company_82split_191114.csv')
 
     args = parser.parse_args()
     max_K = args.maxK
@@ -41,6 +43,17 @@ if __name__ == '__main__':
 
     trdats = []
     ttdats = []
+
+    # if args.exp:
+    #     """
+    #     maintain the same exp condition
+    #     """
+    #     rdat = pd.read_csv(pjoin(datapath, args.exp_file), index_col=0)
+    #     rdat = rdat[rdat['fold'] == 2]
+    #     p_rdat = rdat[rdat['label'] == 1].reset_index(drop=True)[['atlas_location_uuid','duns_number']]
+    #     n_rdat = rdat[rdat['label'] == 0].reset_index(drop=True)[['atlas_location_uuid','duns_number']]
+    #     del rdat
+
 
     for ind_city,filename in enumerate(clfile):
         print('Processing city: %s'%filename)
