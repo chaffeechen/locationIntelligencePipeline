@@ -117,11 +117,12 @@ if __name__ == '__main__':
         print('>> pairs: %d' % len(dlsubdat) )
 
         #### attach these with scores
-        topk = 300
+        # topk = 300
         sspd = pd.read_csv(pjoin(datapath, ssfile[ind_city]), index_col=0)
 
-        sample_sspd = sspd.groupby('atlas_location_uuid').apply(lambda x: x.nlargest(topk, ['similarity'])).reset_index(
-            drop=True)
+        # sample_sspd = sspd.groupby('atlas_location_uuid').apply(lambda x: x.nlargest(topk, ['similarity'])).reset_index(
+        #     drop=True)
+        sample_sspd = sspd
 
         print('4. Similar location')
         cont_col_nameL = ['score_predicted_eo', 'score_employer', 'num_emp_weworkcore', 'num_poi_weworkcore',
