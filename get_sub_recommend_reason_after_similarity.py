@@ -32,6 +32,14 @@ if __name__ == '__main__':
     clfile = [c+args.apps for c in clfile]
     cityname = ['Palo Alto','San Francisco','San Jose','Los Angeles', 'New York']
 
+    comp_feat_file = 'company_feat' + args.apps
+    comp_feat_normed = pd.read_csv(pjoin(datapath, comp_feat_file), index_col=0)
+    loc_feat_file = 'location_feat' + args.apps
+    loc_feat_normed = pd.read_csv(pjoin(datapath, loc_feat_file), index_col=0)
+
+    comp_feat_col = [c for c in comp_feat_normed.columns if c not in ['duns_number', 'atlas_location_uuid']]
+    loc_feat_col = [c for c in loc_feat_normed.columns if c not in ['duns_number', 'atlas_location_uuid']]
+
     if args.ww:
         ww = 'ww_'
     else:
@@ -77,6 +85,7 @@ if __name__ == '__main__':
         reason2 = 'reason_location_based'
         reason3 = 'reason_model_based'
         reason4 = 'reason_similar_location'
+        reason5 = 'reason_closest_company'
         print('Reasoning')
         # Reason 1:
         print('1. Customized Reason')
@@ -134,6 +143,41 @@ if __name__ == '__main__':
         recall_com4 = sub_rec_similar_location(cont_col_name=cont_col_nameL, dummy_col_name=dummy_col_nameL,reason_col_name=reason4)
         loc_comp_loc = recall_com4.get_reason(sspd = sspd, comp_loc=comp_loc, loc_feat=loc_feat, reason='location similar in')
 
+        print('5. Similar company name')
+        gr_dat = comp_loc
+        pred_dat = sspd
+        pred_gr_dat = pred_dat.merge(gr_dat[['atlas_location_uuid', 'duns_number']], on=['atlas_location_uuid'],
+                                     how='left', suffixes=['_prd', '_grd'])
+        print('pairs to be calced:%d' % len(pred_gr_dat))
+
+        prd_comp_feat = \
+        pred_gr_dat[['duns_number_prd']].rename(columns={'duns_number_prd': 'duns_number'}).merge(comp_feat_normed,
+                                                                                                  on='duns_number',
+                                                                                                  how='left')[
+            comp_feat_col].to_numpy()
+        grd_comp_feat = \
+        pred_gr_dat[['duns_number_grd']].rename(columns={'duns_number_grd': 'duns_number'}).merge(comp_feat_normed,
+                                                                                                  on='duns_number',
+                                                                                                  how='left')[
+            comp_feat_col].to_numpy()
+
+        prd_comp_feat = normalize(prd_comp_feat, axis=1)
+        grd_comp_feat = normalize(grd_comp_feat, axis=1)
+        dist = 1 - (prd_comp_feat * grd_comp_feat).sum(axis=1).reshape(-1, 1)
+
+        distpd = pd.DataFrame(dist, columns=['dist'])
+
+        pred_gr_dat2 = pd.concat([pred_gr_dat[['atlas_location_uuid', 'duns_number_prd', 'duns_number_grd']], distpd],
+                                 axis=1)
+        pred_gr_dat2.loc[pred_gr_dat2['dist'] < 1e-12, 'dist'] = 1
+        result = pred_gr_dat2.loc[
+            pred_gr_dat2.groupby(['atlas_location_uuid', 'duns_number_prd'])['dist'].idxmin()].reset_index(drop=True)
+
+        result = result.merge(comp_feat[['duns_number','business_name']], left_on='duns_number_grd', right_on='duns_number', how='left',
+                               suffixes=['', '_useless'])[['atlas_location_uuid','duns_number','business_name']]
+        result = result.rename(columns={'business_name':reason5})
+        result[[reason5]] = 'similar company:'+result[[reason5]]
+
 
         print(len(sample_sspd))
         #merge location base reason
@@ -162,6 +206,14 @@ if __name__ == '__main__':
         sample_sspd = sample_sspd[sample_sspd['reason'].notnull() | sample_sspd[reason4].notnull()]
         sample_sspd[['reason', reason4]] = sample_sspd[['reason', reason4]].fillna('')
         sample_sspd = merge_rec_reason_colwise(sample_sspd, cols=['reason', reason4], dst_col='reason', sep='#')
+
+        #merge company similarity reason
+        sample_sspd = pd.merge(sample_sspd, result, on=['atlas_location_uuid', 'duns_number'], how='left',
+                               suffixes=['', '_right'])
+
+        sample_sspd = sample_sspd[sample_sspd['reason'].notnull() | sample_sspd[reason5].notnull()]
+        sample_sspd[['reason', reason5]] = sample_sspd[['reason', reason5]].fillna('')
+        sample_sspd = merge_rec_reason_colwise(sample_sspd, cols=['reason', reason5], dst_col='reason', sep='#')
 
         print('json format transforming...')
 
