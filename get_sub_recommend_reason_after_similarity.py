@@ -173,10 +173,14 @@ if __name__ == '__main__':
         result = pred_gr_dat2.loc[
             pred_gr_dat2.groupby(['atlas_location_uuid', 'duns_number_prd'])['dist'].idxmin()].reset_index(drop=True)
 
-        result = result.merge(comp_feat[['duns_number','business_name']], left_on='duns_number_grd', right_on='duns_number', how='left',
-                               suffixes=['', '_useless'])[['atlas_location_uuid','duns_number','business_name']]
-        result = result.rename(columns={'business_name':reason5})
-        result[[reason5]] = 'similar company:'+result[[reason5]]
+        result = \
+        result.merge(comp_feat[['duns_number', 'business_name']], left_on='duns_number_grd', right_on='duns_number',
+                     how='left',
+                     suffixes=['', '_useless'])[['atlas_location_uuid' ,'duns_number_prd', 'business_name','dist']]
+        result = result.rename(columns={'business_name': reason5, 'duns_number_prd': 'duns_number'})
+
+        result['dist'] = result['dist'].round(4)
+        result[reason5] = 'similar company: ' + result[reason5] + ' with diff: ' + result['dist'].astype(str)
         print('pairs %d'%len(result))
 
 
