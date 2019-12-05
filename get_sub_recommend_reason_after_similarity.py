@@ -177,6 +177,7 @@ if __name__ == '__main__':
                                suffixes=['', '_useless'])[['atlas_location_uuid','duns_number','business_name']]
         result = result.rename(columns={'business_name':reason5})
         result[[reason5]] = 'similar company:'+result[[reason5]]
+        print('pairs %d'%len(result))
 
 
         print(len(sample_sspd))
