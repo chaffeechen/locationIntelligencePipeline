@@ -94,16 +94,16 @@ if __name__ == '__main__':
         recall_com1 = sub_rec_similar_company(comp_feat=comp_feat, comp_loc=sub_comp_loc,
                                               matching_col=matching_col, reason_col_name=reason1)
         sub_pairs = recall_com1.get_candidate_location_for_company(query_comp_feat=comp_feat, reason='like')
-        sub_pairs[reason1] = sub_pairs.apply(lambda x: 'suitable for ' + x[matching_col], axis=1)
+        sub_pairs[reason1] = sub_pairs.apply(lambda x: 'Similar Industry: ' + x[matching_col] + ' inside the building', axis=1)
         print(sub_pairs.shape)
 
         # Reason2:
         print('2. Location based Reason')
         recall_com2 = sub_rec_condition(sub_loc_feat)
-        sub_loc_recall_com2 = recall_com2.exfiltering('num_fitness_gyms', percentile=0.5, reason='Enough GYM',reason_col_name=reason2)
+        sub_loc_recall_com2 = recall_com2.exfiltering('num_fitness_gyms', percentile=0.5, reason='GYM',reason_col_name=reason2)
         sub_loc_recall_com3 = recall_com2.exfiltering('num_drinking_places', percentile=0.5,
-                                                      reason='Entertainment Available', reason_col_name=reason2)
-        sub_loc_recall_com4 = recall_com2.exfiltering('num_eating_places', percentile=0.5, reason='Easy for lunch',reason_col_name=reason2)
+                                                      reason='Entertainment', reason_col_name=reason2)
+        sub_loc_recall_com4 = recall_com2.exfiltering('num_eating_places', percentile=0.5, reason='Lunch',reason_col_name=reason2)
         print('recall_location_size: %d, %d, %d' % (
         len(sub_loc_recall_com2), len(sub_loc_recall_com3), len(sub_loc_recall_com4.shape)))
 
@@ -111,6 +111,7 @@ if __name__ == '__main__':
         sub_loc_recall = pd.concat([sub_loc_recall_com2, sub_loc_recall_com3, sub_loc_recall_com4], axis=0)
         sub_loc_recall = merge_rec_reason_rowise(sub_loc_recall, group_cols=['atlas_location_uuid'],
                                                  merge_col=reason2)
+        sub_loc_recall[reason2] = 'A lot of ' + sub_loc_recall[reason2] + ' places inside the region'
         if wework_location_only:
             sub_loc_recall = sub_loc_recall.merge(sub_loc_feat_ww[['atlas_location_uuid']], on='atlas_location_uuid',
                                                   how='inner', suffixes=['', '_right'])

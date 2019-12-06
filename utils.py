@@ -565,7 +565,7 @@ class feature_translate(object):
         # print(comp_phs,loc_phs,region_phs)
         final_phs = self.merge_phs([comp_phs, loc_phs, region_phs])
         if final_phs:
-            return 'According to the ' + final_phs
+            return 'Implicit reason: ' + final_phs
         else:
             return ''
 
