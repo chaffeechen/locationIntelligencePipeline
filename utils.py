@@ -5,6 +5,7 @@ import os
 from sklearn.preprocessing import normalize
 from sklearn.preprocessing import OneHotEncoder
 from enum import Enum
+from math import *
 
 pjoin = os.path.join
 
@@ -461,21 +462,21 @@ class feature_translate(object):
         self.col2phs['primary_sic_2'] = (featsrc.company, 'industry type')
         # building
         self.col2phs['score_predicted_eo'] = (featsrc.location, 'eo')
-        self.col2phs['building_class'] = (featsrc.location, 'class')
+        self.col2phs['building_class'] = (featsrc.location, 'high quality of facilities')
         # region
-        self.col2phs['num_retail_stores'] = (featsrc.region, 'shop amenities')
+        self.col2phs['num_retail_stores'] = (featsrc.region, 'shopping friendly')
         self.col2phs['num_doctor_offices'] = (featsrc.region, 'health amenities')
         self.col2phs['num_eating_places'] = (featsrc.region, 'lunch amenities')
         self.col2phs['num_drinking_places'] = (featsrc.region, 'relaxing amenities')
-        self.col2phs['num_hotels'] = (featsrc.region, 'trip amenities')
+        self.col2phs['num_hotels'] = (featsrc.region, 'hotel amenities')
         self.col2phs['num_fitness_gyms'] = (featsrc.region, 'gym amenities')
         self.col2phs['population_density'] = (featsrc.region, 'population')
         self.col2phs['pct_female_population'] = (featsrc.region, 'population structure')
-        self.col2phs['median_age'] = (featsrc.region, 'population environment')
+        self.col2phs['median_age'] = (featsrc.region, 'age distribution of the population')
         self.col2phs['income_per_capita'] = (featsrc.region, 'income level')
         self.col2phs['pct_masters_degree'] = (featsrc.region, 'education degree')
-        self.col2phs['walk_score'] = (featsrc.region, 'walking amenities')
-        self.col2phs['bike_score'] = (featsrc.region, 'biking amenities')
+        self.col2phs['walk_score'] = (featsrc.region, 'walking friendly')
+        self.col2phs['bike_score'] = (featsrc.region, 'biking friendly')
 
     def getItem(self, gvkey):
         # precision matching
@@ -532,18 +533,21 @@ class feature_translate(object):
 
         comp_lst, loc_lst, region_lst = [], [], []
 
+        key_lst = []
         for key in input_lst:
             #             print(key)
             ret = self.getItem(key)
 
             if ret['status']:
-                phss = ret['item']
-                if phss[0] == featsrc.company:
-                    comp_lst.append(phss[1])
-                elif phss[0] == featsrc.location:
-                    loc_lst.append(phss[1])
-                elif phss[0] == featsrc.region:
-                    region_lst.append(phss[1])
+                if ret['key'] not in key_lst: #get rid of the duplicate feature
+                    key_lst.append(ret['key'])
+                    phss = ret['item']
+                    if phss[0] == featsrc.company:
+                        comp_lst.append(phss[1])
+                    elif phss[0] == featsrc.location:
+                        loc_lst.append(phss[1])
+                    elif phss[0] == featsrc.region:
+                        region_lst.append(phss[1])
 
                     #         print(comp_lst,loc_lst,region_lst)
 
@@ -576,6 +580,9 @@ class feature_translate(object):
 # =======================================================================================================================
 # =======================================================================================================================
 class sub_rec_similar_location(object):
+    """
+    In which feature, those tow locations are similar with each other.
+    """
     def __init__(self, cont_col_name, dummy_col_name, reason_col_name='reason'):
         self.cont_col_name = cont_col_name
         self.dummy_col_name = dummy_col_name
@@ -618,3 +625,90 @@ class sub_rec_similar_location(object):
         loc_comp_loc = loc_comp_loc[loc_comp_loc[self.reason_col_name] != '']
         loc_comp_loc[[self.reason_col_name]] = reason + ' ' + loc_comp_loc[self.reason_col_name]
         return loc_comp_loc
+
+
+class sub_rec_similar_company_v2(object):
+    """
+    Retrieve the name of similar company inside the recommended location
+    """
+    def __init__(self, comp_loc, sspd, thresh=0.05):
+        self._gr_dat = comp_loc
+        self._pred_dat = sspd
+        self._sim_thresh = thresh
+
+    def get_reason(self, comp_feat, comp_feat_col, comp_feat_normed, reason_col_name):
+        gr_dat = self._gr_dat
+        pred_dat = self._pred_dat
+
+        pred_gr_dat = pred_dat.merge(gr_dat[['atlas_location_uuid', 'duns_number']], on=['atlas_location_uuid'],
+                                     how='left', suffixes=['_prd', '_grd'])
+        print('pairs to be calced:%d' % len(pred_gr_dat))
+
+        prd_comp_feat = \
+            pred_gr_dat[['duns_number_prd']].rename(columns={'duns_number_prd': 'duns_number'}).merge(comp_feat_normed,
+                                                                                                      on='duns_number',
+                                                                                                      how='left')[
+                comp_feat_col].to_numpy()
+        grd_comp_feat = \
+            pred_gr_dat[['duns_number_grd']].rename(columns={'duns_number_grd': 'duns_number'}).merge(comp_feat_normed,
+                                                                                                      on='duns_number',
+                                                                                                      how='left')[
+                comp_feat_col].to_numpy()
+
+        prd_comp_feat = normalize(prd_comp_feat, axis=1)
+        grd_comp_feat = normalize(grd_comp_feat, axis=1)
+        dist = 1 - (prd_comp_feat * grd_comp_feat).sum(axis=1).reshape(-1, 1)
+
+        distpd = pd.DataFrame(dist, columns=['dist'])
+
+        pred_gr_dat2 = pd.concat([pred_gr_dat[['atlas_location_uuid', 'duns_number_prd', 'duns_number_grd']], distpd],
+                                 axis=1)
+        pred_gr_dat2.loc[pred_gr_dat2['dist'] < 1e-12, 'dist'] = 1
+        result = pred_gr_dat2.loc[
+            pred_gr_dat2.groupby(['atlas_location_uuid', 'duns_number_prd'])['dist'].idxmin()].reset_index(drop=True)
+
+        result = result[result['dist'] <= self._sim_thresh]
+
+        result = \
+            result.merge(comp_feat[['duns_number', 'business_name']], left_on='duns_number_grd', right_on='duns_number',
+                         how='left',
+                         suffixes=['', '_useless'])[['atlas_location_uuid', 'duns_number_prd', 'business_name', 'dist']]
+        result = result.rename(columns={'business_name': reason_col_name, 'duns_number_prd': 'duns_number'})
+
+        result['dist'] = result['dist'].round(4)
+        result[reason_col_name] = 'similar company: ' + result[reason_col_name] + ' with diff: ' + result['dist'].astype(str)
+        print('pairs %d' % len(result))
+        return result
+
+
+def geo_distance(lng1,lat1,lng2,lat2):
+    lng1, lat1, lng2, lat2 = map(radians, [lng1, lat1, lng2, lat2])
+    dlon=lng2-lng1
+    dlat=lat2-lat1
+    a=sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+    dis=2*asin(sqrt(a))*6371*1000
+    return dis
+
+class sub_rec_location_distance(object):
+    """
+    If the recommended location is close to the current location(distance <= dist_thresh),
+    it will be considered as a recommendation reason.
+    """
+    def __init__(self, reason_col_name='reason'):
+        self.reason_col_name = reason_col_name
+        self.threshold = 0.03
+
+    def get_reason(self, sspd, comp_loc, loc_feat, comp_feat, dist_thresh=3.2e3):
+        loc_comp_loc = sspd.merge(comp_loc, how='inner', on='duns_number', suffixes=['', '_grd']) \
+            [['atlas_location_uuid', 'duns_number', 'atlas_location_uuid_grd']]
+        rt_key_col = ['atlas_location_uuid', 'latitude', 'longitude']
+        loc_comp_loc = loc_comp_loc.merge(loc_feat[rt_key_col], on='atlas_location_uuid', suffixes=['', '_pred'])
+        rt_key_col = ['duns_number', 'latitude', 'longitude']
+        loc_comp_loc = loc_comp_loc.merge(comp_feat[rt_key_col], on='duns_number', suffixes=['', '_grd'])
+        loc_comp_loc['geo_dist'] = loc_comp_loc.apply(
+            lambda row:
+            geo_distance(row['longitude'], row['latitude'],
+                         row['longitude_grd'], row['latitude_grd']), axis=1)
+        loc_comp_loc = loc_comp_loc[loc_comp_loc['geo_dist'] <= dist_thresh]
+        loc_comp_loc[self.reason_col_name] = 'close to current location(<' + str(round(dist_thresh / 1e3, 1)) + 'km)'
+        return loc_comp_loc[['atlas_location_uuid', 'duns_number', self.reason_col_name]]
