@@ -155,7 +155,7 @@ if __name__ == '__main__':
                           'pct_masters_degree', 'walk_score', 'bike_score']
         dummy_col_nameL = ['building_class']
         recall_com4 = sub_rec_similar_location(cont_col_name=cont_col_nameL, dummy_col_name=dummy_col_nameL,reason_col_name=reason4)
-        loc_comp_loc = recall_com4.get_reason(sspd = sspd, comp_loc=comp_loc, loc_feat=loc_feat, reason='location similar in')
+        loc_comp_loc = recall_com4.get_reason(sspd = sspd, comp_loc=comp_loc, loc_feat=loc_feat, reason='location similar in',multi_flag=True)
 
         print('5. Similar company name')
         recall_com5 = sub_rec_similar_company_v2(comp_loc = comp_loc, sspd = sspd , thresh=0.05)
@@ -168,10 +168,10 @@ if __name__ == '__main__':
         print(len(sample_sspd))
         #1 merge customized reason
         sample_sspd = pd.merge(sample_sspd, sub_pairs, on=['atlas_location_uuid', 'duns_number'], how='left',
-                               suffixes=['', '_right'])
+                               suffixes=sfx)
         #2 merge company similarity reason
         sample_sspd = pd.merge(sample_sspd, sim_comp_name, on=['atlas_location_uuid', 'duns_number'], how='left',
-                               suffixes=['', '_right'])
+                               suffixes=sfx)
 
         sample_sspd = sample_sspd[sample_sspd[reason1].notnull() | sample_sspd[reason5].notnull()]
         sample_sspd[[reason1, reason5]] = sample_sspd[[reason1, reason5]].fillna('')
@@ -179,7 +179,7 @@ if __name__ == '__main__':
 
         #3 merge location similarity reason
         sample_sspd = pd.merge(sample_sspd, loc_comp_loc, on=['atlas_location_uuid', 'duns_number'], how='left',
-                               suffixes=['', '_right'])
+                               suffixes=sfx)
 
         sample_sspd = sample_sspd[sample_sspd['reason'].notnull() | sample_sspd[reason4].notnull()]
         sample_sspd[['reason', reason4]] = sample_sspd[['reason', reason4]].fillna('')
@@ -187,7 +187,7 @@ if __name__ == '__main__':
 
         #4 merge location base reason
         sample_sspd = pd.merge(sample_sspd, sub_loc_recall[['atlas_location_uuid', reason2]], on='atlas_location_uuid',
-                               how='left', suffixes=['', '_right']).reset_index(drop=True)
+                               how='left', suffixes=sfx).reset_index(drop=True)
 
         sample_sspd = sample_sspd[sample_sspd['reason'].notnull() | sample_sspd[reason2].notnull()]
         sample_sspd[['reason', reason2]] = sample_sspd[['reason', reason2]].fillna('')
@@ -195,7 +195,7 @@ if __name__ == '__main__':
 
         #5 merge location distance
         sample_sspd = pd.merge(sample_sspd, sub_close_loc, on=['atlas_location_uuid', 'duns_number'], how='left',
-                               suffixes=['', '_right'])
+                               suffixes=sfx)
 
         sample_sspd = sample_sspd[sample_sspd['reason'].notnull() | sample_sspd[reason6].notnull()]
         sample_sspd[['reason', reason6]] = sample_sspd[['reason', reason6]].fillna('')
@@ -203,7 +203,7 @@ if __name__ == '__main__':
 
         #6 merge model based reason
         sample_sspd = pd.merge(sample_sspd,dlsubdat, on=['atlas_location_uuid', 'duns_number'], how='left',
-                               suffixes=['', '_right'])
+                               suffixes=sfx)
 
         sample_sspd = sample_sspd[sample_sspd['reason'].notnull() | sample_sspd[reason3].notnull()]
         sample_sspd[['reason', reason3]] = sample_sspd[['reason', reason3]].fillna('')
