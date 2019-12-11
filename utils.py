@@ -345,7 +345,7 @@ class global_filter(object):
         self.loc_feat = loc_feat
 
     def filtering(self, key_column, percentile=0.2, mode='gt'):
-        val = self.loc_feat[[key_column]].quantile(q=percentile).item()
+        val = self.loc_feat[key_column].quantile(q=percentile)
         if mode == 'gt':
             sub_loc = self.loc_feat[self.loc_feat[key_column] >= val]
         else:
@@ -359,7 +359,7 @@ class global_filter(object):
         return self
 
     def exfiltering(self, loc_feat, key_column, percentile=0.2, mode='gt'):
-        val = loc_feat[[key_column]].quantile(q=percentile).item()
+        val = loc_feat[key_column].quantile(q=percentile)
         if mode == 'gt':
             sub_loc = self.loc_feat[self.loc_feat[key_column] >= val]
         else:
@@ -383,7 +383,7 @@ class sub_rec_condition(object):
 
     def filtering(self, cond_col, percentile=0.5, reason='many things'):
         self.cond_col.append(cond_col)
-        val = self.loc_feat[[cond_col]].quantile(q=percentile).item()
+        val = self.loc_feat[cond_col].quantile(q=percentile)
         if max(val, 10):
             self.loc_feat = self.loc_feat[self.loc_feat[cond_col] >= val].reset_index(drop=True)
             self.reason.append(reason)
@@ -391,7 +391,7 @@ class sub_rec_condition(object):
 
     def exfiltering(self, cond_col, percentile=0.6, reason='many things', reason_col_name='reason'):
         self.cond_col.append(cond_col)
-        val = self.loc_feat[[cond_col]].quantile(q=percentile).item()
+        val = self.loc_feat[cond_col].quantile(q=percentile)
         if max(val, 10):
             sub_loc = self.loc_feat[self.loc_feat[cond_col] >= val].reset_index(drop=True)
         sub_loc[reason_col_name] = reason
