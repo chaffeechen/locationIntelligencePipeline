@@ -637,7 +637,7 @@ class sub_rec_similar_location(object):
             loc_comp_loc['cnt'] = loc_comp_loc['cnt'].fillna(0)
 
             idx = loc_comp_loc.groupby(['atlas_location_uuid', 'duns_number'])['cnt'].idxmax()
-            loc_comp_loc = (loc_comp_loc.iloc[idx]).reset_index()
+            loc_comp_loc = (loc_comp_loc.loc[idx]).reset_index()
 
 
         loc_comp_loc = loc_comp_loc[['atlas_location_uuid', 'duns_number', self.reason_col_name]]
@@ -717,11 +717,12 @@ class sub_rec_location_distance(object):
         self.reason_col_name = reason_col_name
         self.threshold = 0.03
 
-    def get_reason(self, sspd, comp_loc, loc_feat, comp_feat, dist_thresh=3.2e3):
-        loc_comp_loc = sspd.merge(comp_loc, how='inner', on='duns_number', suffixes=['', '_grd']) \
-            [['atlas_location_uuid', 'duns_number', 'atlas_location_uuid_grd']]
+    def get_reason(self, sspd, loc_feat, comp_feat, dist_thresh=3.2e3):
+        # loc_comp_loc = sspd.merge(comp_loc, how='inner', on='duns_number', suffixes=['', '_grd']) \
+        #     [['atlas_location_uuid', 'duns_number', 'atlas_location_uuid_grd']]
+
         rt_key_col = ['atlas_location_uuid', 'latitude', 'longitude']
-        loc_comp_loc = loc_comp_loc.merge(loc_feat[rt_key_col], on='atlas_location_uuid', suffixes=['', '_pred'])
+        loc_comp_loc = sspd[['atlas_location_uuid', 'duns_number']].merge(loc_feat[rt_key_col], on='atlas_location_uuid', suffixes=['', '_pred'])
         rt_key_col = ['duns_number', 'latitude', 'longitude']
         loc_comp_loc = loc_comp_loc.merge(comp_feat[rt_key_col], on='duns_number', suffixes=['', '_grd'])
         loc_comp_loc['geo_dist'] = loc_comp_loc.apply(

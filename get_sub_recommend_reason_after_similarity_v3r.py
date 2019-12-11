@@ -163,7 +163,7 @@ if __name__ == '__main__':
 
         print('6. Close to current location')
         recall_com6 = sub_rec_location_distance(reason_col_name=reason6)
-        sub_close_loc = recall_com6.get_reason(sspd=sspd,comp_loc=comp_loc,loc_feat=loc_feat,comp_feat=comp_feat,dist_thresh=3.2e3)
+        sub_close_loc = recall_com6.get_reason(sspd=sspd,loc_feat=loc_feat,comp_feat=comp_feat,dist_thresh=3.2e3)
 
         print(len(sample_sspd))
         #1 merge customized reason
