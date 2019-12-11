@@ -333,6 +333,12 @@ class sub_rec_similar_company(object):
         sub_pairs[self.reason_col_name] = reason
         return sub_pairs
 
+    def get_candidate_location_for_company_fast(self, query_comp_loc, reason='similar company inside'):
+        sub_pairs = pd.merge(query_comp_loc[['duns_number','atlas_location_uuid', self.matching_col]], self.loc_type, on=['atlas_location_uuid',self.matching_col],
+                             how='inner', suffixes=['', '_right'])
+        sub_pairs[self.reason_col_name] = reason
+        return sub_pairs
+
 
 class global_filter(object):
     def __init__(self, loc_feat):
@@ -400,7 +406,7 @@ def ab(df):
     return ','.join(df.values)
 
 
-def merge_rec_reason_rowise(sub_pairs, group_cols: list, merge_col: str):
+def     merge_rec_reason_rowise(sub_pairs, group_cols: list, merge_col: str):
     return sub_pairs.groupby(group_cols)[merge_col].apply(ab).reset_index()
 
 
@@ -590,7 +596,7 @@ class sub_rec_similar_location(object):
         self._info = 'It will keep index of sspd'
         self.threshold = 0.03
 
-    def get_reason(self, sspd, comp_loc, loc_feat, reason='location similar in '):
+    def get_reason(self, sspd, comp_loc, loc_feat, reason='location similar in ',multi_flag=False):
         loc_comp_loc = sspd.merge(comp_loc, how='inner', on='duns_number', suffixes=['', '_grd']) \
             [['atlas_location_uuid', 'duns_number', 'atlas_location_uuid_grd']]
 
@@ -620,7 +626,20 @@ class sub_rec_similar_location(object):
             clean_str = ';'.join([c for c in text.split(';') if c != ''])
             return clean_str
 
-        loc_comp_loc[[self.reason_col_name]] = loc_comp_loc[self.reason_col_name].apply(lambda text: clean(text))
+        def cnter(text):
+            ns = text.count(';')
+            return ns
+
+        loc_comp_loc[self.reason_col_name] = loc_comp_loc[self.reason_col_name].apply(lambda text: clean(text))
+
+        if multi_flag:
+            loc_comp_loc['cnt'] = loc_comp_loc[self.reason_col_name].apply(lambda text: cnter(text))
+            loc_comp_loc['cnt'] = loc_comp_loc['cnt'].fillna(0)
+
+            idx = loc_comp_loc.groupby(['atlas_location_uuid', 'duns_number'])['cnt'].idxmax()
+            loc_comp_loc = (loc_comp_loc.iloc[idx]).reset_index()
+
+
         loc_comp_loc = loc_comp_loc[['atlas_location_uuid', 'duns_number', self.reason_col_name]]
         loc_comp_loc = loc_comp_loc[loc_comp_loc[self.reason_col_name] != '']
         loc_comp_loc[[self.reason_col_name]] = reason + ' ' + loc_comp_loc[self.reason_col_name]

@@ -9,6 +9,7 @@ import argparse
 from utils import *
 pjoin = os.path.join
 
+sfx = ['', '_right']
 
 
 if __name__ == '__main__':
@@ -19,7 +20,7 @@ if __name__ == '__main__':
     arg = parser.add_argument
     arg('--run_root', default='/Users/yefeichen/Database/location_recommender_system/')
     arg('--ls_card',default='location_scorecard_191113.csv')
-    arg('--apps',type=str,default='_191113.csv')
+    arg('--apps',type=str,default='_191114.csv')
     arg('--sampled',action='store_true',help='is similarity score sampled?')
     arg('--ww',action='store_true',help='is ww building only?')
 
@@ -65,7 +66,7 @@ if __name__ == '__main__':
 
         # if we only focus on buildings with companies inside
         loc_feat = loc_feat.merge(comp_loc[['atlas_location_uuid']].groupby('atlas_location_uuid').first().reset_index(),
-                                  on='atlas_location_uuid', how='inner', suffixes=['', '_right'])
+                                  on='atlas_location_uuid', how='inner', suffixes=sfx)
 
         print('Generate reason files:<key,reason>:<locid,reason>,<(compid,locid),reason>')
         print('Filtering')
@@ -76,10 +77,13 @@ if __name__ == '__main__':
         if wework_location_only:
             sub_loc_feat_ww = sub_loc_feat[sub_loc_feat['is_wework'] == True]
             sub_comp_loc = pd.merge(comp_loc, sub_loc_feat_ww[['atlas_location_uuid']], on='atlas_location_uuid',
-                                    how='inner', suffixes=['', '_right'])
+                                    how='inner', suffixes=sfx) #multi comp loc
         else:
             sub_comp_loc = pd.merge(comp_loc, sub_loc_feat[['atlas_location_uuid']], on='atlas_location_uuid',
-                                    how='inner', suffixes=['', '_right'])
+                                    how='inner', suffixes=sfx) #multi comp loc
+
+        sspd = pd.read_csv(pjoin(datapath, ssfile[ind_city]), index_col=0)
+
 
         reason1 = 'reason_similar_biz' #sub_pairs
         reason2 = 'reason_location_based' #sub_loc_recall
@@ -92,11 +96,16 @@ if __name__ == '__main__':
         print('1. Customized Reason')
         # matching_col = 'major_industry_category'
         matching_col = 'primary_sic_2_digit_v2'
+        query_comp_loc = sspd[['atlas_location_uuid','duns_number']]
+        query_comp_loc = query_comp_loc.merge(comp_feat[['duns_number',matching_col]],on='duns_number',suffixes=sfx)
+
         recall_com1 = sub_rec_similar_company(comp_feat=comp_feat, comp_loc=sub_comp_loc,
                                               matching_col=matching_col, reason_col_name=reason1)
-        sub_pairs = recall_com1.get_candidate_location_for_company(query_comp_feat=comp_feat, reason='like')
+
+        sub_pairs = recall_com1.get_candidate_location_for_company_fast(query_comp_loc=query_comp_loc, reason='like')
         #explanar
-        sub_pairs[reason1] = sub_pairs.apply(lambda x: 'close to similar business', axis=1)
+        sub_pairs[reason1] = 'close to similar business'
+        # sub_pairs[reason1] = sub_pairs.apply(lambda x: 'close to similar business', axis=1)
         print(sub_pairs.shape)
 
         # Reason2:
@@ -122,7 +131,7 @@ if __name__ == '__main__':
         print('sub_loc_recall sized %d' % len(sub_loc_recall))
         # sub_loc_recall.head()
 
-        # Reason3:
+        # Reason3: Tag!!!!
         print('3. Model based Reason')
         featTranslator = feature_translate()
         dlsubdat = pd.read_csv(pjoin(datapath,dlsub_ssfile[ind_city]),index_col=0)
@@ -132,7 +141,7 @@ if __name__ == '__main__':
 
         #### attach these with scores
         # topk = 300
-        sspd = pd.read_csv(pjoin(datapath, ssfile[ind_city]), index_col=0)
+        # sspd = pd.read_csv(pjoin(datapath, ssfile[ind_city]), index_col=0)
 
         # sample_sspd = sspd.groupby('atlas_location_uuid').apply(lambda x: x.nlargest(topk, ['similarity'])).reset_index(
         #     drop=True)
@@ -218,9 +227,9 @@ if __name__ == '__main__':
         col_list = ['company_id', 'building_id', 'similarity', 'note', 'atlas_location_uuid', 'algorithm']
         sample_sspd = sample_sspd[col_list]
 
-        print(len(sample_sspd))
-
         sample_sspd['similarity'] = sample_sspd['similarity'].round(4)
+
+        print(len(sample_sspd))
 
         sample_sspd.to_csv('sub_' + ssfile[ind_city])
         # sspd[sspd['reason_right'].isnull()]
