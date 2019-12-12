@@ -22,7 +22,7 @@ if __name__ == '__main__':
     arg = parser.add_argument
     arg('--run_root', default='/Users/yefeichen/Database/location_recommender_system/')
     arg('--app_date',default='_191114')
-    arg('--ratio',default=0.8)
+    arg('--ratio',type=float,default=0.8)
     arg('--test_round', type=int, default=4)
     arg('--maxK',type=int,default=50)
     # arg('--exp',action='store_true')
