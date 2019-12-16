@@ -484,52 +484,52 @@ class feature_translate_of_locaiton_similar_in(object):
 
     def init_dict(self):
         self.col2phs['score_predicted_eo'] = (
-            featsrc.location, 'The predicted economic occupancy is as high as your current location')
+            featsrc.location, 'the predicted economic occupancy is as high as your current location')
         self.col2phs['score_employer'] = (
-            featsrc.location, 'There are as many good businesses in this location as your current location')
+            featsrc.location, 'there are as many good businesses in this location as your current location')
         self.col2phs['building_class'] = (
-            featsrc.location, 'The building class in this location is as good as your current one')
+            featsrc.location, 'the building class in this location is as good as your current one')
         self.col2phs['num_retail_stores'] = (
-            featsrc.location, 'There are enough retail stores in this region as your current one')
+            featsrc.location, 'there are enough retail stores in this region as your current one')
         self.col2phs['num_doctor_offices'] = (
-            featsrc.location, 'The medical service in this location is as good as your current location')
+            featsrc.location, 'the medical service in this location is as good as your current location')
         self.col2phs[('num_eating_places', 'num_drinking_places')] = (
-            featsrc.location, 'Eating and drinking are as convenient as your current location')
+            featsrc.location, 'tating and drinking are as convenient as your current location')
         self.col2phs['num_hotels'] = (
-            featsrc.location, 'This location has as many hotels to host your visitors as your current location')
+            featsrc.location, 'this location has as many hotels to host your visitors as your current location')
         self.col2phs['num_fitness_gyms'] = (
             featsrc.location,
-            'This location has as many gyms as your current location to take care of the health of your employee')
+            'this location has as many gyms as your current location to take care of the health of your employee')
         self.col2phs['population_density'] = (
             featsrc.location,
-            'The demographics, especially the population density, in this location is similar to your current location, and will meet your hiring needs')
+            'the demographics, especially the population density, in this location is similar to your current location, and will meet your hiring needs')
         self.col2phs['pct_female_population'] = (
             featsrc.location,
-            'The gender diversity of this location is as good as your current location')
+            'the gender diversity of this location is as good as your current location')
         self.col2phs['median_age'] = (
             featsrc.location,
-            'The demographics, especially the median age, in this location is similar to your current location, and will meet your hiring needs')
+            'the demographics, especially the median age, in this location is similar to your current location, and will meet your hiring needs')
         self.col2phs['income_per_capita'] = (
             featsrc.location,
-            'The employee statistics, especially the income per capita, in this location is similar to your current location, and will meet your hiring needs')
+            'the employee statistics, especially the income per capita, in this location is similar to your current location, and will meet your hiring needs')
         self.col2phs['walk_score'] = (
             featsrc.location,
-            'This location is as easily accessible by walk as your current location')
+            'this location is as easily accessible by walk as your current location')
         self.col2phs['bike_score'] = (
             featsrc.location,
-            'This location is as easily accessible by bike as your current location')
+            'this location is as easily accessible by bike as your current location')
         self.col2phs['num_emp_weworkcore'] = (
             featsrc.location,
-            'The employee statistics, especially the number of employees in the core industry, in this location is similar to your current location, and will meet your hiring needs')
+            'the employee statistics, especially the number of employees in the core industry, in this location is similar to your current location, and will meet your hiring needs')
         self.col2phs['num_poi_weworkcore'] = (
             featsrc.location,
-            'The business environment, especially the number of core businesses relevant to your company, in this area is similar to your current location, and will meet your business development needs')
+            'the business environment, especially the number of core businesses relevant to your company, in this area is similar to your current location, and will meet your business development needs')
         self.col2phs['pct_wwcore_business'] = (
             featsrc.location,
-            'The business environment, especially the main category of surrounding businesses, in this area is similar to your current location, and will meet your business development needs')
+            'the business environment, especially the main category of surrounding businesses, in this area is similar to your current location, and will meet your business development needs')
         self.col2phs['pct_wwcore_employee'] = (
             featsrc.location,
-            'The business environment, especially the pecentage of employees of core categories relevant to your company, in this area is similar to your current location, and will meet your business development needs')
+            'the business environment, especially the pecentage of employees of core categories relevant to your company, in this area is similar to your current location, and will meet your business development needs')
 
 
 
@@ -662,7 +662,7 @@ class feature_translate(object):
         # print(comp_phs,loc_phs,region_phs)
         final_phs = self.merge_phs([comp_phs, loc_phs, region_phs])
         if final_phs:
-            return 'Implicit reason: ' + final_phs
+            return 'Implicit reason: ' + final_phs + '.'
         else:
             return ''
 
@@ -707,7 +707,7 @@ class sub_rec_similar_location(object):
                 tmp['reason'] = ret_reason['item'][1]
                 tmp['reason'] = tmp['reason']
                 loc_comp_loc[[self.reason_col_name]] = \
-                    loc_comp_loc[self.reason_col_name].str.cat(tmp['reason'], join='left', sep=';', na_rep='')
+                    loc_comp_loc[self.reason_col_name].str.cat(tmp['reason'], join='left', sep='|', na_rep='')
         for c in self.cont_col_name:
             ret_reason = self.reason_translator.getItem(gvkey=c)
             if ret_reason['status']:
@@ -716,14 +716,14 @@ class sub_rec_similar_location(object):
                 tmp = tmp[abs(tmp[c] - tmp[ca]) / (tmp[ca] + 1e-5) < self.threshold]
                 tmp['reason'] = ret_reason['item'][1]
                 loc_comp_loc[[self.reason_col_name]] = \
-                    loc_comp_loc[self.reason_col_name].str.cat(tmp['reason'], join='left', sep=';', na_rep='')
+                    loc_comp_loc[self.reason_col_name].str.cat(tmp['reason'], join='left', sep='|', na_rep='')
 
         def clean(text):  # problem caused by str.cat. Thus clean is a must.
-            clean_str = ';'.join([c for c in text.split(';') if c != ''])
+            clean_str = '| '.join([c for c in text.split('|') if c != ''])
             return clean_str
 
         def cnter(text):
-            ns = text.count(';')
+            ns = text.count('|')
             return ns
 
         loc_comp_loc[self.reason_col_name] = loc_comp_loc[self.reason_col_name].apply(lambda text: clean(text))
