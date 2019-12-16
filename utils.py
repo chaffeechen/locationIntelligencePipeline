@@ -704,8 +704,8 @@ class sub_rec_similar_location(object):
                 tmp = loc_comp_loc[['atlas_location_uuid', 'duns_number', c, ca]].dropna()
                 tmp = tmp[tmp[c] == tmp[ca]]
 
-                tmp['reason'] = ret_reason['item']
-                tmp['reason'] = tmp['reason'].astype(str)
+                tmp['reason'] = ret_reason['item'][1]
+                tmp['reason'] = tmp['reason']
                 loc_comp_loc[[self.reason_col_name]] = \
                     loc_comp_loc[self.reason_col_name].str.cat(tmp['reason'], join='left', sep=';', na_rep='')
         for c in self.cont_col_name:
@@ -714,7 +714,7 @@ class sub_rec_similar_location(object):
                 ca = c + '_grd'
                 tmp = loc_comp_loc[['atlas_location_uuid', 'duns_number', c, ca]].dropna()
                 tmp = tmp[abs(tmp[c] - tmp[ca]) / (tmp[ca] + 1e-5) < self.threshold]
-                tmp['reason'] = ret_reason['item']
+                tmp['reason'] = ret_reason['item'][1]
                 loc_comp_loc[[self.reason_col_name]] = \
                     loc_comp_loc[self.reason_col_name].str.cat(tmp['reason'], join='left', sep=';', na_rep='')
 
