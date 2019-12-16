@@ -334,7 +334,8 @@ class sub_rec_similar_company(object):
         return sub_pairs
 
     def get_candidate_location_for_company_fast(self, query_comp_loc, reason='similar company inside'):
-        sub_pairs = pd.merge(query_comp_loc[['duns_number','atlas_location_uuid', self.matching_col]], self.loc_type, on=['atlas_location_uuid',self.matching_col],
+        sub_pairs = pd.merge(query_comp_loc[['duns_number', 'atlas_location_uuid', self.matching_col]], self.loc_type,
+                             on=['atlas_location_uuid', self.matching_col],
                              how='inner', suffixes=['', '_right'])
         sub_pairs[self.reason_col_name] = reason
         return sub_pairs
@@ -402,12 +403,12 @@ class sub_rec_condition(object):
 
 
 # ======================================================================================================================
-def ab(df):
-    return ','.join(df.values)
+def ab(df,sep=','):
+    return sep.join(df.values)
 
 
-def     merge_rec_reason_rowise(sub_pairs, group_cols: list, merge_col: str):
-    return sub_pairs.groupby(group_cols)[merge_col].apply(ab).reset_index()
+def merge_rec_reason_rowise(sub_pairs, group_cols: list, merge_col: str, sep=','):
+    return sub_pairs.groupby(group_cols)[merge_col].apply(ab,sep=sep).reset_index()
 
 
 def merge_rec_reason_colwise(sub_pairs, cols=['reason1', 'reason2'], dst_col='reason', sep=','):
@@ -452,6 +453,85 @@ class featsrc(Enum):
     region = 2
 
 
+class feature_translate_of_locaiton_similar_in(object):
+    def __init__(self,tail_delimiter=''):
+        self.col2phs = {}
+        self.init_dict()
+
+        if tail_delimiter != '':
+            for key,item in self.col2phs():
+                self.col2phs[key] = item + tail_delimiter
+
+
+    def getItem(self, gvkey):
+        #tuple matching first
+        keytuple = [ key for key in self.col2phs.keys() if isinstance(key,tuple) ]
+        for key in keytuple:
+            if gvkey in key:
+                return {'status': True,
+                    'key': gvkey,
+                    'item': self.col2phs[key]}
+        # precision matching
+        if gvkey in self.col2phs.keys():
+            return {'status': True,
+                    'key': gvkey,
+                    'item': self.col2phs[gvkey]}
+
+        return {'status': False}
+
+
+    def init_dict(self):
+        self.col2phs['score_predicted_eo'] = (
+            featsrc.location, 'The predicted economic occupancy is as high as your current location')
+        self.col2phs['score_employer'] = (
+            featsrc.location, 'There are as many good businesses in this location as your current location')
+        self.col2phs['building_class'] = (
+            featsrc.location, 'The building class in this location is as good as your current one')
+        self.col2phs['num_retail_stores'] = (
+            featsrc.location, 'There are enough retail stores in this region as your current one')
+        self.col2phs['num_doctor_offices'] = (
+            featsrc.location, 'The medical service in this location is as good as your current location')
+        self.col2phs[('num_eating_places', 'num_drinking_places')] = (
+            featsrc.location, 'Eating and drinking are as convenient as your current location')
+        self.col2phs['num_hotels'] = (
+            featsrc.location, 'This location has as many hotels to host your visitors as your current location')
+        self.col2phs['num_fitness_gyms'] = (
+            featsrc.location,
+            'This location has as many gyms as your current location to take care of the health of your employee')
+        self.col2phs['population_density'] = (
+            featsrc.location,
+            'The demographics, especially the population density, in this location is similar to your current location, and will meet your hiring needs')
+        self.col2phs['pct_female_population'] = (
+            featsrc.location,
+            'The gender diversity of this location is as good as your current location')
+        self.col2phs['median_age'] = (
+            featsrc.location,
+            'The demographics, especially the median age, in this location is similar to your current location, and will meet your hiring needs')
+        self.col2phs['income_per_capita'] = (
+            featsrc.location,
+            'The employee statistics, especially the income per capita, in this location is similar to your current location, and will meet your hiring needs')
+        self.col2phs['walk_score'] = (
+            featsrc.location,
+            'This location is as easily accessible by walk as your current location')
+        self.col2phs['bike_score'] = (
+            featsrc.location,
+            'This location is as easily accessible by bike as your current location')
+        self.col2phs['num_emp_weworkcore'] = (
+            featsrc.location,
+            'The employee statistics, especially the number of employees in the core industry, in this location is similar to your current location, and will meet your hiring needs')
+        self.col2phs['num_poi_weworkcore'] = (
+            featsrc.location,
+            'The business environment, especially the number of core businesses relevant to your company, in this area is similar to your current location, and will meet your business development needs')
+        self.col2phs['pct_wwcore_business'] = (
+            featsrc.location,
+            'The business environment, especially the main category of surrounding businesses, in this area is similar to your current location, and will meet your business development needs')
+        self.col2phs['pct_wwcore_employee'] = (
+            featsrc.location,
+            'The business environment, especially the pecentage of employees of core categories relevant to your company, in this area is similar to your current location, and will meet your business development needs')
+
+
+
+
 class feature_translate(object):
     def __init__(self):
         self.col2phs = {}
@@ -459,15 +539,20 @@ class feature_translate(object):
 
     def init_dict(self):
         # company
-        self.col2phs['emp_here'] = (featsrc.company, 'local employee number')
-        self.col2phs['emp_here_range'] = (featsrc.company, 'local employee number')
-        self.col2phs['emp_total'] = (featsrc.company, 'total employee number')
-        self.col2phs['sales_volume_us'] = (featsrc.company, 'sales volume')
-        self.col2phs['location_type'] = (featsrc.company, 'type(Single,Branch,HQ)')
-        self.col2phs['square_footage'] = (featsrc.company, 'expected square footage')
-        self.col2phs['primary_sic_2'] = (featsrc.company, 'industry type')
+        self.col2phs['emp_here'] = (
+        featsrc.company, 'This location matches the amount of employees your company plans to hire locally')
+        # self.col2phs['emp_here_range'] = (featsrc.company, 'local employee number') avoid for duplicating reason, leave it to dummy category
+        self.col2phs['emp_total'] = (
+        featsrc.company, 'Companies with similar size as yours also has an office in this location')
+        self.col2phs['sales_volume_us'] = (featsrc.company, 'This location can supply the sales volume of the company')
+        self.col2phs['location_type'] = (
+        featsrc.company, 'This location can provide the office type demanded by your company')
+        self.col2phs['square_footage'] = (
+        featsrc.company, 'This location can match the expected square footage of your company')
+        self.col2phs['primary_sic_2'] = (
+        featsrc.company, 'This location is good for the industry type of your business')
         # building
-        self.col2phs['score_predicted_eo'] = (featsrc.location, 'eo')
+        self.col2phs['score_predicted_eo'] = (featsrc.location, 'high predicted score of economic occupancy')
         self.col2phs['building_class'] = (featsrc.location, 'high quality of facilities')
         # region
         self.col2phs['num_retail_stores'] = (featsrc.region, 'shopping friendly')
@@ -545,7 +630,7 @@ class feature_translate(object):
             ret = self.getItem(key)
 
             if ret['status']:
-                if ret['key'] not in key_lst: #get rid of the duplicate feature
+                if ret['key'] not in key_lst:  # get rid of the duplicate feature
                     key_lst.append(ret['key'])
                     phss = ret['item']
                     if phss[0] == featsrc.company:
@@ -555,10 +640,10 @@ class feature_translate(object):
                     elif phss[0] == featsrc.region:
                         region_lst.append(phss[1])
 
-                    #         print(comp_lst,loc_lst,region_lst)
+                        #         print(comp_lst,loc_lst,region_lst)
 
         if comp_lst:  # not empty assert
-            comp_phs = self.merge_lst(comp_lst, pre_phs='', post_phs='of your company')
+            comp_phs = self.merge_lst(comp_lst, pre_phs='', post_phs='')
         else:
             comp_phs = ''
 
@@ -579,6 +664,7 @@ class feature_translate(object):
         else:
             return ''
 
+
 # =======================================================================================================================
 # =======================================================================================================================
 # get_sub_recommend_reason_after_similarity
@@ -589,14 +675,16 @@ class sub_rec_similar_location(object):
     """
     In which feature, those tow locations are similar with each other.
     """
+
     def __init__(self, cont_col_name, dummy_col_name, reason_col_name='reason'):
         self.cont_col_name = cont_col_name
         self.dummy_col_name = dummy_col_name
         self.reason_col_name = reason_col_name
         self._info = 'It will keep index of sspd'
         self.threshold = 0.03
+        self.reason_translator = feature_translate_of_locaiton_similar_in()
 
-    def get_reason(self, sspd, comp_loc, loc_feat, reason='location similar in ',multi_flag=False):
+    def get_reason(self, sspd, comp_loc, loc_feat, reason='Location similar in: ', multi_flag=False):
         loc_comp_loc = sspd.merge(comp_loc, how='inner', on='duns_number', suffixes=['', '_grd']) \
             [['atlas_location_uuid', 'duns_number', 'atlas_location_uuid_grd']]
 
@@ -608,21 +696,26 @@ class sub_rec_similar_location(object):
             loc_comp_loc[self.reason_col_name] = ''
 
         for c in self.dummy_col_name:
-            ca = c + '_grd'
-            tmp = loc_comp_loc[['atlas_location_uuid', 'duns_number', c, ca]].dropna()
-            tmp = tmp[tmp[c] == tmp[ca]]
-            tmp['reason'] = c
-            loc_comp_loc[[self.reason_col_name]] = \
-                loc_comp_loc[self.reason_col_name].str.cat(tmp['reason'], join='left', sep=';', na_rep='')
-        for c in self.cont_col_name:
-            ca = c + '_grd'
-            tmp = loc_comp_loc[['atlas_location_uuid', 'duns_number', c, ca]].dropna()
-            tmp = tmp[abs(tmp[c] - tmp[ca]) / (tmp[ca] + 1e-5) < self.threshold]
-            tmp['reason'] = c
-            loc_comp_loc[[self.reason_col_name]] = \
-                loc_comp_loc[self.reason_col_name].str.cat(tmp['reason'], join='left', sep=';', na_rep='')
+            ret_reason = self.reason_translator.getItem(gvkey=c)
+            if ret_reason['status']:
+                ca = c + '_grd'
+                tmp = loc_comp_loc[['atlas_location_uuid', 'duns_number', c, ca]].dropna()
+                tmp = tmp[tmp[c] == tmp[ca]]
 
-        def clean(text):#problem caused by str.cat. Thus clean is a must.
+                tmp['reason'] = ret_reason['item']
+                loc_comp_loc[[self.reason_col_name]] = \
+                    loc_comp_loc[self.reason_col_name].str.cat(tmp['reason'], join='left', sep=';', na_rep='')
+        for c in self.cont_col_name:
+            ret_reason = self.reason_translator.getItem(gvkey=c)
+            if ret_reason['status']:
+                ca = c + '_grd'
+                tmp = loc_comp_loc[['atlas_location_uuid', 'duns_number', c, ca]].dropna()
+                tmp = tmp[abs(tmp[c] - tmp[ca]) / (tmp[ca] + 1e-5) < self.threshold]
+                tmp['reason'] = ret_reason['item']
+                loc_comp_loc[[self.reason_col_name]] = \
+                    loc_comp_loc[self.reason_col_name].str.cat(tmp['reason'], join='left', sep=';', na_rep='')
+
+        def clean(text):  # problem caused by str.cat. Thus clean is a must.
             clean_str = ';'.join([c for c in text.split(';') if c != ''])
             return clean_str
 
@@ -632,17 +725,16 @@ class sub_rec_similar_location(object):
 
         loc_comp_loc[self.reason_col_name] = loc_comp_loc[self.reason_col_name].apply(lambda text: clean(text))
 
-        if multi_flag:
+        if multi_flag:  # for region based model
             loc_comp_loc['cnt'] = loc_comp_loc[self.reason_col_name].apply(lambda text: cnter(text))
             loc_comp_loc['cnt'] = loc_comp_loc['cnt'].fillna(0)
 
             idx = loc_comp_loc.groupby(['atlas_location_uuid', 'duns_number'])['cnt'].idxmax()
             loc_comp_loc = (loc_comp_loc.loc[idx]).reset_index()
 
-
         loc_comp_loc = loc_comp_loc[['atlas_location_uuid', 'duns_number', self.reason_col_name]]
         loc_comp_loc = loc_comp_loc[loc_comp_loc[self.reason_col_name] != '']
-        loc_comp_loc[[self.reason_col_name]] = reason + ' ' + loc_comp_loc[self.reason_col_name]
+        loc_comp_loc[[self.reason_col_name]] = reason + loc_comp_loc[self.reason_col_name]
         return loc_comp_loc
 
 
@@ -650,6 +742,7 @@ class sub_rec_similar_company_v2(object):
     """
     Retrieve the name of similar company inside the recommended location
     """
+
     def __init__(self, comp_loc, sspd, thresh=0.05):
         self._gr_dat = comp_loc
         self._pred_dat = sspd
@@ -695,24 +788,27 @@ class sub_rec_similar_company_v2(object):
         result = result.rename(columns={'business_name': reason_col_name, 'duns_number_prd': 'duns_number'})
 
         result['dist'] = result['dist'].round(4)
-        result[reason_col_name] = 'similar company: ' + result[reason_col_name] + ' with diff: ' + result['dist'].astype(str)
+        result[reason_col_name] = 'similar company: ' + result[reason_col_name] + ' with diff: ' + result[
+            'dist'].astype(str)
         print('pairs %d' % len(result))
         return result
 
 
-def geo_distance(lng1,lat1,lng2,lat2):
+def geo_distance(lng1, lat1, lng2, lat2):
     lng1, lat1, lng2, lat2 = map(radians, [lng1, lat1, lng2, lat2])
-    dlon=lng2-lng1
-    dlat=lat2-lat1
-    a=sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
-    dis=2*asin(sqrt(a))*6371*1000
+    dlon = lng2 - lng1
+    dlat = lat2 - lat1
+    a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
+    dis = 2 * asin(sqrt(a)) * 6371 * 1000
     return dis
+
 
 class sub_rec_location_distance(object):
     """
     If the recommended location is close to the current location(distance <= dist_thresh),
     it will be considered as a recommendation reason.
     """
+
     def __init__(self, reason_col_name='reason'):
         self.reason_col_name = reason_col_name
         self.threshold = 0.03
@@ -722,7 +818,9 @@ class sub_rec_location_distance(object):
         #     [['atlas_location_uuid', 'duns_number', 'atlas_location_uuid_grd']]
 
         rt_key_col = ['atlas_location_uuid', 'latitude', 'longitude']
-        loc_comp_loc = sspd[['atlas_location_uuid', 'duns_number']].merge(loc_feat[rt_key_col], on='atlas_location_uuid', suffixes=['', '_pred'])
+        loc_comp_loc = sspd[['atlas_location_uuid', 'duns_number']].merge(loc_feat[rt_key_col],
+                                                                          on='atlas_location_uuid',
+                                                                          suffixes=['', '_pred'])
         rt_key_col = ['duns_number', 'latitude', 'longitude']
         loc_comp_loc = loc_comp_loc.merge(comp_feat[rt_key_col], on='duns_number', suffixes=['', '_grd'])
         loc_comp_loc['geo_dist'] = loc_comp_loc.apply(
