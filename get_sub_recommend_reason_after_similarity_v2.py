@@ -146,7 +146,7 @@ if __name__ == '__main__':
                           'pct_masters_degree', 'walk_score', 'bike_score']
         dummy_col_nameL = ['building_class']
         recall_com4 = sub_rec_similar_location(cont_col_name=cont_col_nameL, dummy_col_name=dummy_col_nameL,reason_col_name=reason4)
-        loc_comp_loc = recall_com4.get_reason(sspd = sspd, comp_loc=comp_loc, loc_feat=loc_feat, reason='location similar in')
+        loc_comp_loc = recall_com4.get_reason(sspd = sspd, comp_loc=comp_loc, loc_feat=loc_feat, reason='location similar in: ')
 
         print('5. Similar company name')
         recall_com5 = sub_rec_similar_company_v2(comp_loc = comp_loc, sspd = sspd , thresh=0.05)
