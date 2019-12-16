@@ -462,11 +462,13 @@ class feature_translate_of_locaiton_similar_in(object):
             for key,item in self.col2phs():
                 self.col2phs[key] = item + tail_delimiter
 
+        self.keytuple = [key for key in self.col2phs.keys() if isinstance(key, tuple)]
+
 
     def getItem(self, gvkey):
         #tuple matching first
-        keytuple = [ key for key in self.col2phs.keys() if isinstance(key,tuple) ]
-        for key in keytuple:
+
+        for key in self.keytuple:
             if gvkey in key:
                 return {'status': True,
                     'key': gvkey,
@@ -703,6 +705,7 @@ class sub_rec_similar_location(object):
                 tmp = tmp[tmp[c] == tmp[ca]]
 
                 tmp['reason'] = ret_reason['item']
+                tmp['reason'] = tmp['reason'].astype(str)
                 loc_comp_loc[[self.reason_col_name]] = \
                     loc_comp_loc[self.reason_col_name].str.cat(tmp['reason'], join='left', sep=';', na_rep='')
         for c in self.cont_col_name:
