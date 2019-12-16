@@ -650,12 +650,12 @@ class feature_translate(object):
             comp_phs = ''
 
         if loc_lst:
-            loc_phs = self.merge_lst(loc_lst, pre_phs='this location has ', post_phs='')
+            loc_phs = self.merge_lst(loc_lst, pre_phs='this location has', post_phs='')
         else:
             loc_phs = ''
 
         if region_lst:
-            region_phs = self.merge_lst(region_lst, pre_phs='this region is ', post_phs='')
+            region_phs = self.merge_lst(region_lst, pre_phs='this region is', post_phs='')
         else:
             region_phs = ''
 
