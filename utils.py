@@ -791,8 +791,8 @@ class sub_rec_similar_company_v2(object):
         result = result.rename(columns={'business_name': reason_col_name, 'duns_number_prd': 'duns_number'})
 
         result['dist'] = result['dist'].round(4)
-        result[reason_col_name] = 'similar company: ' + result[reason_col_name] + ' with diff: ' + result[
-            'dist'].astype(str)
+        result[reason_col_name] = 'There is a similar company already inside: ' + result[reason_col_name] + ' with diff: ' + result[
+            'dist'].astype(str) + '. '
         print('pairs %d' % len(result))
         return result
 
@@ -831,5 +831,5 @@ class sub_rec_location_distance(object):
             geo_distance(row['longitude'], row['latitude'],
                          row['longitude_grd'], row['latitude_grd']), axis=1)
         loc_comp_loc = loc_comp_loc[loc_comp_loc['geo_dist'] <= dist_thresh]
-        loc_comp_loc[self.reason_col_name] = 'close to current location(<' + str(round(dist_thresh / 1e3, 1)) + 'km)'
+        loc_comp_loc[self.reason_col_name] = 'Recommended location is close to current location(<' + str(round(dist_thresh / 1e3, 1)) + 'km). '
         return loc_comp_loc[['atlas_location_uuid', 'duns_number', self.reason_col_name]]

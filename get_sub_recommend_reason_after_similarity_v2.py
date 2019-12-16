@@ -113,8 +113,8 @@ if __name__ == '__main__':
         sub_loc_recall = pd.concat([sub_loc_recall_com2, sub_loc_recall_com3, sub_loc_recall_com4], axis=0)
         # explanar:
         sub_loc_recall = merge_rec_reason_rowise(sub_loc_recall, group_cols=['atlas_location_uuid'],
-                                                 merge_col=reason2,sep='|')
-        sub_loc_recall[reason2] = 'This building is at a location with great amenities: ' + sub_loc_recall[reason2]
+                                                 merge_col=reason2,sep='| ')
+        sub_loc_recall[reason2] = 'This building is at a location with great amenities: ' + sub_loc_recall[reason2] + '. '
 
         if wework_location_only:
             sub_loc_recall = sub_loc_recall.merge(sub_loc_feat_ww[['atlas_location_uuid']], on='atlas_location_uuid',
