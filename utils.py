@@ -737,7 +737,7 @@ class sub_rec_similar_location(object):
 
         loc_comp_loc = loc_comp_loc[['atlas_location_uuid', 'duns_number', self.reason_col_name]]
         loc_comp_loc = loc_comp_loc[loc_comp_loc[self.reason_col_name] != '']
-        loc_comp_loc[[self.reason_col_name]] = reason + loc_comp_loc[self.reason_col_name]
+        loc_comp_loc[[self.reason_col_name]] = reason + loc_comp_loc[self.reason_col_name] + '.'
         return loc_comp_loc
 
 
