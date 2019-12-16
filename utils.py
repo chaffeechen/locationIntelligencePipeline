@@ -494,7 +494,7 @@ class feature_translate_of_locaiton_similar_in(object):
         self.col2phs['num_doctor_offices'] = (
             featsrc.location, 'the medical service in this location is as good as your current location')
         self.col2phs[('num_eating_places', 'num_drinking_places')] = (
-            featsrc.location, 'tating and drinking are as convenient as your current location')
+            featsrc.location, 'eating and drinking are as convenient as your current location')
         self.col2phs['num_hotels'] = (
             featsrc.location, 'this location has as many hotels to host your visitors as your current location')
         self.col2phs['num_fitness_gyms'] = (
