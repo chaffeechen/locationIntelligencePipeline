@@ -542,20 +542,20 @@ class feature_translate(object):
     def init_dict(self):
         # company
         self.col2phs['emp_here'] = (
-        featsrc.company, 'This location matches the amount of employees your company plans to hire locally')
+        featsrc.company, 'this location matches the amount of employees your company plans to hire locally')
         # self.col2phs['emp_here_range'] = (featsrc.company, 'local employee number') avoid for duplicating reason, leave it to dummy category
         self.col2phs['emp_total'] = (
-        featsrc.company, 'Companies with similar size as yours also has an office in this location')
-        self.col2phs['sales_volume_us'] = (featsrc.company, 'This location can supply the sales volume of the company')
+        featsrc.company, 'companies with similar size as yours also has an office in this location')
+        self.col2phs['sales_volume_us'] = (featsrc.company, 'this location can supply the sales volume of the company')
         self.col2phs['location_type'] = (
-        featsrc.company, 'This location can provide the office type demanded by your company')
+        featsrc.company, 'this location can provide the office type demanded by your company')
         self.col2phs['square_footage'] = (
-        featsrc.company, 'This location can match the expected square footage of your company')
+        featsrc.company, 'this location can match the expected square footage of your company')
         self.col2phs['primary_sic_2'] = (
-        featsrc.company, 'This location is good for the industry type of your business')
+        featsrc.company, 'this location is good for the industry type of your business')
         # building
-        self.col2phs['score_predicted_eo'] = (featsrc.location, 'high predicted score of economic occupancy')
-        self.col2phs['building_class'] = (featsrc.location, 'high quality of facilities')
+        self.col2phs['score_predicted_eo'] = (featsrc.location, 'a high predicted score of economic occupancy')
+        self.col2phs['building_class'] = (featsrc.location, 'a high quality of facilities')
         # region
         self.col2phs['num_retail_stores'] = (featsrc.region, 'shopping friendly')
         self.col2phs['num_doctor_offices'] = (featsrc.region, 'health amenities')
@@ -600,12 +600,12 @@ class feature_translate(object):
             post_phs = ' ' + post_phs
         return pre_phs + phs + post_phs
 
-    def merge_phs(self, lst: list):
+    def merge_phs(self, lst: list, sep='; '):
         phs = ''
         _lst = [p for p in lst if p]
         for p in _lst:
             if phs:
-                phs = phs + '; ' + p
+                phs = phs + sep + p
             else:
                 phs = p
         return phs
@@ -650,17 +650,17 @@ class feature_translate(object):
             comp_phs = ''
 
         if loc_lst:
-            loc_phs = self.merge_lst(loc_lst, pre_phs='', post_phs='of the building')
+            loc_phs = self.merge_lst(loc_lst, pre_phs='this location has ', post_phs='')
         else:
             loc_phs = ''
 
         if region_lst:
-            region_phs = self.merge_lst(region_lst, pre_phs='', post_phs='of the region')
+            region_phs = self.merge_lst(region_lst, pre_phs='this region is ', post_phs='')
         else:
             region_phs = ''
 
         # print(comp_phs,loc_phs,region_phs)
-        final_phs = self.merge_phs([comp_phs, loc_phs, region_phs])
+        final_phs = self.merge_phs([comp_phs, loc_phs, region_phs],sep='| ')
         if final_phs:
             return 'Implicit reason: ' + final_phs + '.'
         else:
