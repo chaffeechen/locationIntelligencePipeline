@@ -164,7 +164,7 @@ if __name__ == '__main__':
         sample_sspd = pd.merge(sample_sspd, sim_comp_name, on=['atlas_location_uuid', 'duns_number'], how='left',
                                suffixes=['', '_right'])
 
-        sample_sspd = sample_sspd[sample_sspd[reason1].notnull() | sample_sspd[reason5].notnull()]
+        # sample_sspd = sample_sspd[sample_sspd[reason1].notnull() | sample_sspd[reason5].notnull()]
         sample_sspd[[reason1, reason5]] = sample_sspd[[reason1, reason5]].fillna('')
         sample_sspd = merge_rec_reason_colwise(sample_sspd, cols=[reason1, reason5], dst_col='reason', sep='#')
 
@@ -172,7 +172,7 @@ if __name__ == '__main__':
         sample_sspd = pd.merge(sample_sspd, loc_comp_loc, on=['atlas_location_uuid', 'duns_number'], how='left',
                                suffixes=['', '_right'])
 
-        sample_sspd = sample_sspd[sample_sspd['reason'].notnull() | sample_sspd[reason4].notnull()]
+        # sample_sspd = sample_sspd[sample_sspd['reason'].notnull() | sample_sspd[reason4].notnull()]
         sample_sspd[['reason', reason4]] = sample_sspd[['reason', reason4]].fillna('')
         sample_sspd = merge_rec_reason_colwise(sample_sspd, cols=['reason', reason4], dst_col='reason', sep='#')
 
@@ -180,7 +180,7 @@ if __name__ == '__main__':
         sample_sspd = pd.merge(sample_sspd, sub_loc_recall[['atlas_location_uuid', reason2]], on='atlas_location_uuid',
                                how='left', suffixes=['', '_right']).reset_index(drop=True)
 
-        sample_sspd = sample_sspd[sample_sspd['reason'].notnull() | sample_sspd[reason2].notnull()]
+        # sample_sspd = sample_sspd[sample_sspd['reason'].notnull() | sample_sspd[reason2].notnull()]
         sample_sspd[['reason', reason2]] = sample_sspd[['reason', reason2]].fillna('')
         sample_sspd = merge_rec_reason_colwise(sample_sspd, cols=['reason', reason2], dst_col='reason',sep='#')
 
@@ -188,7 +188,7 @@ if __name__ == '__main__':
         sample_sspd = pd.merge(sample_sspd, sub_close_loc, on=['atlas_location_uuid', 'duns_number'], how='left',
                                suffixes=['', '_right'])
 
-        sample_sspd = sample_sspd[sample_sspd['reason'].notnull() | sample_sspd[reason6].notnull()]
+        # sample_sspd = sample_sspd[sample_sspd['reason'].notnull() | sample_sspd[reason6].notnull()]
         sample_sspd[['reason', reason6]] = sample_sspd[['reason', reason6]].fillna('')
         sample_sspd = merge_rec_reason_colwise(sample_sspd, cols=['reason', reason6], dst_col='reason', sep='#')
 
@@ -196,7 +196,7 @@ if __name__ == '__main__':
         sample_sspd = pd.merge(sample_sspd,dlsubdat, on=['atlas_location_uuid', 'duns_number'], how='left',
                                suffixes=['', '_right'])
 
-        sample_sspd = sample_sspd[sample_sspd['reason'].notnull() | sample_sspd[reason3].notnull()]
+        # sample_sspd = sample_sspd[sample_sspd['reason'].notnull() | sample_sspd[reason3].notnull()]
         sample_sspd[['reason', reason3]] = sample_sspd[['reason', reason3]].fillna('')
         sample_sspd = merge_rec_reason_colwise(sample_sspd, cols=['reason', reason3], dst_col='reason',sep='#')
 

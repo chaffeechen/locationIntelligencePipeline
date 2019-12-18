@@ -83,7 +83,7 @@ if __name__ == '__main__':
                                     how='inner', suffixes=sfx) #multi comp loc
 
         sspd = pd.read_csv(pjoin(datapath, ssfile[ind_city]), index_col=0)
-
+        print('similarity score pairs: %d'%len(sspd))
 
         reason1 = 'reason_similar_biz' #sub_pairs
         reason2 = 'reason_location_based' #sub_loc_recall
@@ -146,6 +146,7 @@ if __name__ == '__main__':
         # sample_sspd = sspd.groupby('atlas_location_uuid').apply(lambda x: x.nlargest(topk, ['similarity'])).reset_index(
         #     drop=True)
         sample_sspd = sspd
+        print('similarity score sampled pairs: %d' % len(sample_sspd))
 
         print('4. Similar location')
         cont_col_nameL = ['score_predicted_eo', 'score_employer', 'num_emp_weworkcore', 'num_poi_weworkcore',
@@ -169,11 +170,13 @@ if __name__ == '__main__':
         #1 merge customized reason
         sample_sspd = pd.merge(sample_sspd, sub_pairs, on=['atlas_location_uuid', 'duns_number'], how='left',
                                suffixes=sfx)
+        print('merging...%d'%len(sample_sspd))
         #2 merge company similarity reason
         sample_sspd = pd.merge(sample_sspd, sim_comp_name, on=['atlas_location_uuid', 'duns_number'], how='left',
                                suffixes=sfx)
+        print('merging...%d' % len(sample_sspd))
 
-        sample_sspd = sample_sspd[sample_sspd[reason1].notnull() | sample_sspd[reason5].notnull()]
+        # sample_sspd = sample_sspd[sample_sspd[reason1].notnull() | sample_sspd[reason5].notnull()]
         sample_sspd[[reason1, reason5]] = sample_sspd[[reason1, reason5]].fillna('')
         sample_sspd = merge_rec_reason_colwise(sample_sspd, cols=[reason1, reason5], dst_col='reason', sep='#')
 
@@ -181,7 +184,7 @@ if __name__ == '__main__':
         sample_sspd = pd.merge(sample_sspd, loc_comp_loc, on=['atlas_location_uuid', 'duns_number'], how='left',
                                suffixes=sfx)
 
-        sample_sspd = sample_sspd[sample_sspd['reason'].notnull() | sample_sspd[reason4].notnull()]
+        # sample_sspd = sample_sspd[sample_sspd['reason'].notnull() | sample_sspd[reason4].notnull()]
         sample_sspd[['reason', reason4]] = sample_sspd[['reason', reason4]].fillna('')
         sample_sspd = merge_rec_reason_colwise(sample_sspd, cols=['reason', reason4], dst_col='reason', sep='#')
 
@@ -189,7 +192,7 @@ if __name__ == '__main__':
         sample_sspd = pd.merge(sample_sspd, sub_loc_recall[['atlas_location_uuid', reason2]], on='atlas_location_uuid',
                                how='left', suffixes=sfx).reset_index(drop=True)
 
-        sample_sspd = sample_sspd[sample_sspd['reason'].notnull() | sample_sspd[reason2].notnull()]
+        # sample_sspd = sample_sspd[sample_sspd['reason'].notnull() | sample_sspd[reason2].notnull()]
         sample_sspd[['reason', reason2]] = sample_sspd[['reason', reason2]].fillna('')
         sample_sspd = merge_rec_reason_colwise(sample_sspd, cols=['reason', reason2], dst_col='reason',sep='#')
 
@@ -197,7 +200,7 @@ if __name__ == '__main__':
         sample_sspd = pd.merge(sample_sspd, sub_close_loc, on=['atlas_location_uuid', 'duns_number'], how='left',
                                suffixes=sfx)
 
-        sample_sspd = sample_sspd[sample_sspd['reason'].notnull() | sample_sspd[reason6].notnull()]
+        # sample_sspd = sample_sspd[sample_sspd['reason'].notnull() | sample_sspd[reason6].notnull()]
         sample_sspd[['reason', reason6]] = sample_sspd[['reason', reason6]].fillna('')
         sample_sspd = merge_rec_reason_colwise(sample_sspd, cols=['reason', reason6], dst_col='reason', sep='#')
 
@@ -205,7 +208,7 @@ if __name__ == '__main__':
         sample_sspd = pd.merge(sample_sspd,dlsubdat, on=['atlas_location_uuid', 'duns_number'], how='left',
                                suffixes=sfx)
 
-        sample_sspd = sample_sspd[sample_sspd['reason'].notnull() | sample_sspd[reason3].notnull()]
+        # sample_sspd = sample_sspd[sample_sspd['reason'].notnull() | sample_sspd[reason3].notnull()]
         sample_sspd[['reason', reason3]] = sample_sspd[['reason', reason3]].fillna('')
         sample_sspd = merge_rec_reason_colwise(sample_sspd, cols=['reason', reason3], dst_col='reason',sep='#')
 
