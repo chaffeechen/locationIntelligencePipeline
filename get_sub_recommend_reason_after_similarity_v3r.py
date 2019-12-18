@@ -104,17 +104,17 @@ if __name__ == '__main__':
 
         sub_pairs = recall_com1.get_candidate_location_for_company_fast(query_comp_loc=query_comp_loc, reason='like')
         #explanar
-        sub_pairs[reason1] = 'close to similar business'
+        sub_pairs[reason1] = 'This location has a tenant company which is in the same industry as your company.'
         # sub_pairs[reason1] = sub_pairs.apply(lambda x: 'close to similar business', axis=1)
         print(sub_pairs.shape)
 
         # Reason2:
         print('2. Location based Reason')
         recall_com2 = sub_rec_condition(sub_loc_feat)
-        sub_loc_recall_com2 = recall_com2.exfiltering('num_fitness_gyms', percentile=0.5, reason='GYM',reason_col_name=reason2)
+        sub_loc_recall_com2 = recall_com2.exfiltering('num_fitness_gyms', percentile=0.5, reason='there are enough gyms to work out',reason_col_name=reason2)
         sub_loc_recall_com3 = recall_com2.exfiltering('num_drinking_places', percentile=0.5,
-                                                      reason='Entertainment', reason_col_name=reason2)
-        sub_loc_recall_com4 = recall_com2.exfiltering('num_eating_places', percentile=0.5, reason='Lunch',reason_col_name=reason2)
+                                                      reason='there are enough bars to have a drink', reason_col_name=reason2)
+        sub_loc_recall_com4 = recall_com2.exfiltering('num_eating_places', percentile=0.5, reason='there are enough restaurants to get food',reason_col_name=reason2)
         print('recall_location_size: %d, %d, %d' % (
         len(sub_loc_recall_com2), len(sub_loc_recall_com3), len(sub_loc_recall_com4.shape)))
 
@@ -122,8 +122,8 @@ if __name__ == '__main__':
         sub_loc_recall = pd.concat([sub_loc_recall_com2, sub_loc_recall_com3, sub_loc_recall_com4], axis=0)
         # explanar:
         sub_loc_recall = merge_rec_reason_rowise(sub_loc_recall, group_cols=['atlas_location_uuid'],
-                                                 merge_col=reason2)
-        sub_loc_recall[reason2] = 'rich amenities(' + sub_loc_recall[reason2] + ')'
+                                                 merge_col=reason2,sep='| ')
+        sub_loc_recall[reason2] = 'This building is at a location with great amenities: ' + sub_loc_recall[reason2] + '. '
 
         if wework_location_only:
             sub_loc_recall = sub_loc_recall.merge(sub_loc_feat_ww[['atlas_location_uuid']], on='atlas_location_uuid',
@@ -155,7 +155,7 @@ if __name__ == '__main__':
                           'pct_masters_degree', 'walk_score', 'bike_score']
         dummy_col_nameL = ['building_class']
         recall_com4 = sub_rec_similar_location(cont_col_name=cont_col_nameL, dummy_col_name=dummy_col_nameL,reason_col_name=reason4)
-        loc_comp_loc = recall_com4.get_reason(sspd = sspd, comp_loc=comp_loc, loc_feat=loc_feat, reason='location similar in',multi_flag=True)
+        loc_comp_loc = recall_com4.get_reason(sspd = sspd, comp_loc=comp_loc, loc_feat=loc_feat, reason='Location similar in: ',multi_flag=True)
 
         print('5. Similar company name')
         recall_com5 = sub_rec_similar_company_v2(comp_loc = comp_loc, sspd = sspd , thresh=0.05)
@@ -252,4 +252,4 @@ dfs = dfs[['company_id', 'similarity', 'note', 'algorithm', 'atlas_location_uuid
 col_list = ['company_id', 'building_id', 'similarity', 'note', 'algorithm', 'atlas_location_uuid']
 dfs = dfs[col_list]
 
-dfs.to_csv('sub_all_similarity.csv',index=False)
+dfs.to_csv('sub_all_similarity_multi.csv',index=False)
