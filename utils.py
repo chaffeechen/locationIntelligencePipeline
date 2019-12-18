@@ -557,19 +557,19 @@ class feature_translate(object):
         self.col2phs['score_predicted_eo'] = (featsrc.location, 'a high predicted score of economic occupancy')
         self.col2phs['building_class'] = (featsrc.location, 'a high quality of facilities')
         # region
-        self.col2phs['num_retail_stores'] = (featsrc.region, 'shopping friendly')
-        self.col2phs['num_doctor_offices'] = (featsrc.region, 'health amenities')
-        self.col2phs['num_eating_places'] = (featsrc.region, 'lunch amenities')
-        self.col2phs['num_drinking_places'] = (featsrc.region, 'relaxing amenities')
-        self.col2phs['num_hotels'] = (featsrc.region, 'hotel amenities')
-        self.col2phs['num_fitness_gyms'] = (featsrc.region, 'gym amenities')
-        self.col2phs['population_density'] = (featsrc.region, 'population')
-        self.col2phs['pct_female_population'] = (featsrc.region, 'population structure')
-        self.col2phs['median_age'] = (featsrc.region, 'age distribution of the population')
-        self.col2phs['income_per_capita'] = (featsrc.region, 'income level')
-        self.col2phs['pct_masters_degree'] = (featsrc.region, 'education degree')
-        self.col2phs['walk_score'] = (featsrc.region, 'walking friendly')
-        self.col2phs['bike_score'] = (featsrc.region, 'biking friendly')
+        self.col2phs['num_retail_stores'] = (featsrc.region, 'shopping amenities is enough for your company')
+        self.col2phs['num_doctor_offices'] = (featsrc.region, 'health amenities is enough for your company')
+        self.col2phs['num_eating_places'] = (featsrc.region, 'eating amenities is enough for your company')
+        self.col2phs['num_drinking_places'] = (featsrc.region, 'relaxing amenities is enough for your company')
+        self.col2phs['num_hotels'] = (featsrc.region, 'hotel amenities is enough for your company')
+        self.col2phs['num_fitness_gyms'] = (featsrc.region, 'gym amenities is enough for your company')
+        self.col2phs['population_density'] = (featsrc.region, 'population density is suitable for your company')
+        self.col2phs['pct_female_population'] = (featsrc.region, 'gender diversity is suitable for your company')
+        self.col2phs['median_age'] = (featsrc.region, 'age distribution of the population meets the need of your company')
+        self.col2phs['income_per_capita'] = (featsrc.region, 'income level is adequate to your company')
+        self.col2phs['pct_masters_degree'] = (featsrc.region, 'education degree meets the need of your company')
+        self.col2phs['walk_score'] = (featsrc.region, 'it is walking friendly')
+        self.col2phs['bike_score'] = (featsrc.region, 'it is biking friendly')
 
     def getItem(self, gvkey):
         # precision matching
@@ -655,7 +655,7 @@ class feature_translate(object):
             loc_phs = ''
 
         if region_lst:
-            region_phs = self.merge_lst(region_lst, pre_phs='this region is', post_phs='')
+            region_phs = self.merge_lst(region_lst, pre_phs='', post_phs='inside the region')
         else:
             region_phs = ''
 
