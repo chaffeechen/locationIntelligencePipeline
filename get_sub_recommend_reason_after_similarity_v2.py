@@ -148,9 +148,10 @@ if __name__ == '__main__':
         recall_com4 = sub_rec_similar_location(cont_col_name=cont_col_nameL, dummy_col_name=dummy_col_nameL,reason_col_name=reason4)
         loc_comp_loc = recall_com4.get_reason(sspd = sspd, comp_loc=comp_loc, loc_feat=loc_feat, reason='Location similar in: ')
 
-        print('5. Similar company name')
-        recall_com5 = sub_rec_similar_company_v2(comp_loc = comp_loc, sspd = sspd , thresh=0.05)
-        sim_comp_name = recall_com5.get_reason(comp_feat=comp_feat,comp_feat_col=comp_feat_col,comp_feat_normed=comp_feat_normed,reason_col_name = reason5 )
+        if args.sampled and cityname[ind_city] not in ['New York']:
+            print('5. Similar company name')
+            recall_com5 = sub_rec_similar_company_v2(comp_loc = comp_loc, sspd = sspd , thresh=0.05)
+            sim_comp_name = recall_com5.get_reason(comp_feat=comp_feat,comp_feat_col=comp_feat_col,comp_feat_normed=comp_feat_normed,reason_col_name = reason5 )
 
         print('6. Close to current location')
         recall_com6 = sub_rec_location_distance(reason_col_name=reason6)
@@ -161,8 +162,11 @@ if __name__ == '__main__':
         sample_sspd = pd.merge(sample_sspd, sub_pairs, on=['atlas_location_uuid', 'duns_number'], how='left',
                                suffixes=['', '_right'])
         #2 merge company similarity reason
-        sample_sspd = pd.merge(sample_sspd, sim_comp_name, on=['atlas_location_uuid', 'duns_number'], how='left',
-                               suffixes=['', '_right'])
+        if args.sampled and cityname[ind_city] not in ['New York']:
+            sample_sspd = pd.merge(sample_sspd, sim_comp_name, on=['atlas_location_uuid', 'duns_number'], how='left',
+                                   suffixes=['', '_right'])
+        else:
+            sample_sspd[reason5] = 'Similar company recommendation reason is skipped for New York.'
 
         # sample_sspd = sample_sspd[sample_sspd[reason1].notnull() | sample_sspd[reason5].notnull()]
         sample_sspd[[reason1, reason5]] = sample_sspd[[reason1, reason5]].fillna('')
