@@ -178,7 +178,7 @@ if __name__ == '__main__':
                                suffixes=sfx)
         else:
             sample_sspd[reason5] = 'Similar company recommendation reason is skipped for New York.'
-            
+
         print('merging...%d' % len(sample_sspd))
 
         # sample_sspd = sample_sspd[sample_sspd[reason1].notnull() | sample_sspd[reason5].notnull()]
