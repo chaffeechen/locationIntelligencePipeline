@@ -48,7 +48,7 @@ if __name__ == '__main__':
     if args.sampled:
         sam = 'sampled_'
     else:
-        sam = ''
+        sam = 'all_'
 
     ssfile = [ sam+ww+c.replace(args.apps,'')+'_similarity'+args.apps for c in clfile ]
     # ssfile = ['ww_PA_similarity_20191113.csv','ww_SF_similarity_20191113.csv','ww_SJ_similarity_20191113.csv',
