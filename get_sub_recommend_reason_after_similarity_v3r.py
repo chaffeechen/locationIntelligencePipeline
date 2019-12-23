@@ -177,7 +177,7 @@ if __name__ == '__main__':
             sample_sspd = pd.merge(sample_sspd, sim_comp_name, on=['atlas_location_uuid', 'duns_number'], how='left',
                                suffixes=sfx)
         else:
-            sample_sspd[reason5] = 'Similar company recommendation reason is skipped for New York.'
+            sample_sspd[reason5] = 'Similar company recommendation reason is skipped for New York/San Francisco.'
 
         print('merging...%d' % len(sample_sspd))
 
