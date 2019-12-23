@@ -159,7 +159,7 @@ if __name__ == '__main__':
         loc_comp_loc = recall_com4.get_reason(sspd = sspd, comp_loc=comp_loc, loc_feat=loc_feat, reason='Location similar in: ',multi_flag=True)
 
         print('5. Similar company name')
-        if args.sampled or (cityname[ind_city] not in ['New York']):
+        if args.sampled or (cityname[ind_city] not in ['New York','San Francisco']):
             recall_com5 = sub_rec_similar_company_v2(comp_loc = comp_loc, sspd = sspd , thresh=0.05)
             sim_comp_name = recall_com5.get_reason(comp_feat=comp_feat,comp_feat_col=comp_feat_col,comp_feat_normed=comp_feat_normed,reason_col_name = reason5 )
 
@@ -173,7 +173,7 @@ if __name__ == '__main__':
                                suffixes=sfx)
         print('merging...%d'%len(sample_sspd))
         #2 merge company similarity reason
-        if args.sampled or (cityname[ind_city] not in ['New York']):
+        if args.sampled or (cityname[ind_city] not in ['New York','San Francisco']):
             sample_sspd = pd.merge(sample_sspd, sim_comp_name, on=['atlas_location_uuid', 'duns_number'], how='left',
                                suffixes=sfx)
         else:
