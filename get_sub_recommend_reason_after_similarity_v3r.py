@@ -11,6 +11,8 @@ pjoin = os.path.join
 
 sfx = ['', '_right']
 
+from header import *
+
 
 if __name__ == '__main__':
     """
@@ -27,11 +29,10 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     datapath = args.run_root
-    cfile = ['dnb_pa.csv','dnb_sf.csv','dnb_sj.csv','dnb_Los_Angeles.csv','dnb_New_York.csv']
+    cfile = origin_comp_file
     lfile = args.ls_card
-    clfile = ['PA','SF','SJ','LA','NY']
-    clfile = [c+args.apps for c in clfile]
-    cityname = ['Palo Alto','San Francisco','San Jose','Los Angeles', 'New York']
+    clfile = [c+args.apps for c in cityabbr]
+    cityname = citylongname
 
     comp_feat_file = 'company_feat' + args.apps
     comp_feat_normed = pd.read_csv(pjoin(datapath, comp_feat_file), index_col=0)
@@ -149,12 +150,8 @@ if __name__ == '__main__':
         print('similarity score sampled pairs: %d' % len(sample_sspd))
 
         print('4. Similar location')
-        cont_col_nameL = ['score_predicted_eo', 'score_employer', 'num_emp_weworkcore', 'num_poi_weworkcore',
-                          'pct_wwcore_employee', 'pct_wwcore_business', 'num_retail_stores', 'num_doctor_offices',
-                          'num_eating_places', 'num_drinking_places', 'num_hotels', 'num_fitness_gyms',
-                          'population_density', 'pct_female_population', 'median_age', 'income_per_capita',
-                          'pct_masters_degree', 'walk_score', 'bike_score']
-        dummy_col_nameL = ['building_class']
+        cont_col_nameL = feature_column['cont_col_nameL']
+        dummy_col_nameL = feature_column['dummy_col_nameL']
         recall_com4 = sub_rec_similar_location(cont_col_name=cont_col_nameL, dummy_col_name=dummy_col_nameL,reason_col_name=reason4)
         loc_comp_loc = recall_com4.get_reason(sspd = sspd, comp_loc=comp_loc, loc_feat=loc_feat, reason='Location similar in: ',multi_flag=True)
 

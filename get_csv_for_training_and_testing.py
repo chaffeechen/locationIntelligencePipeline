@@ -15,6 +15,8 @@ from math import *
 from sklearn.preprocessing import normalize
 from utils import *
 
+from header import *
+
 pjoin = os.path.join
 
 if __name__ == '__main__':
@@ -27,33 +29,23 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     datapath = args.run_root
-    cfile = ['dnb_pa.csv', 'dnb_sf.csv', 'dnb_sj.csv', 'dnb_Los_Angeles.csv', 'dnb_New_York.csv']
+    cfile = origin_comp_file
     app_date = args.app_date
     apps = app_date + '.csv'
     lfile = args.ls_card  # It is fixed as input
-    clfile = ['PA', 'SF', 'SJ', 'LA', 'NY']
-    clfile = [c + apps for c in clfile]
+    clfile = [c + apps for c in cityabbr]
 
     print('Args:',datapath,apps,lfile,args.ratio)
 
-    not_feat_col = ['duns_number',
-                    'atlas_location_uuid',
-                    'longitude_loc',
-                    'latitude_loc',
-                    'city',
-                    'label']
-    cont_col_nameC = ['emp_here', 'emp_total', 'sales_volume_us', 'square_footage', 'emp_here_range']
-    spec_col_nameC = 'emp_here_range'
-    cont_col_nameL = ['score_predicted_eo', 'score_employer', 'num_emp_weworkcore', 'num_poi_weworkcore',
-                      'pct_wwcore_employee', 'pct_wwcore_business', 'num_retail_stores', 'num_doctor_offices',
-                      'num_eating_places', 'num_drinking_places', 'num_hotels', 'num_fitness_gyms',
-                      'population_density', 'pct_female_population', 'median_age', 'income_per_capita',
-                      'pct_masters_degree', 'walk_score', 'bike_score']
-    key_col_comp = ['duns_number']
-    key_col_loc = ['atlas_location_uuid']
+    not_feat_col = feature_column['not_feat_col']
+    cont_col_nameC = feature_column['cont_col_nameC']
+    spec_col_nameC = feature_column['spec_col_nameC']
+    cont_col_nameL = feature_column['cont_col_nameL']
+    key_col_comp = feature_column['key_col_comp']
+    key_col_loc = feature_column['key_col_loc']
 
-    dummy_col_nameL = ['building_class']
-    dummy_col_nameC = ['major_industry_category', 'location_type', 'primary_sic_2_digit']
+    dummy_col_nameL = feature_column['dummy_col_nameC']
+    dummy_col_nameC = feature_column['dummy_col_nameL']
 
 
     ##Multi training data generator(multi city)

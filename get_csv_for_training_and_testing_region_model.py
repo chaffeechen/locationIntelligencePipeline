@@ -17,6 +17,8 @@ from utils import *
 
 pjoin = os.path.join
 
+from header import *
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     arg = parser.add_argument
@@ -33,7 +35,7 @@ if __name__ == '__main__':
 
     apps = args.app_date + '.csv'
 
-    citynameabbr = ['PA', 'SF', 'SJ', 'LA', 'NY']
+    citynameabbr = cityabbr
     datapath = args.run_root
 
     clfile = [c + apps for c in citynameabbr]
