@@ -751,6 +751,63 @@ class sub_rec_similar_company_v2(object):
         self._pred_dat = sspd
         self._sim_thresh = thresh
 
+    def get_reason_batch(self, comp_feat, comp_feat_col, comp_feat_normed, reason_col_name, batch_size = 100000):
+        gr_dat = self._gr_dat
+
+        batch_iter = ceil(1.0*len(self._pred_dat)/batch_size)
+        total_result = []
+
+        for i in range(batch_iter):
+            print('processing %d of %d'%(i,batch_iter) )
+            bgidx = i*batch_size
+            edidx = min( (i+1)*batch_size, len(self._pred_dat) )
+            pred_dat = self._pred_dat.iloc[bgidx:edidx]
+
+            pred_gr_dat = pred_dat.merge(gr_dat[['atlas_location_uuid', 'duns_number']], on=['atlas_location_uuid'],
+                                         how='left', suffixes=['_prd', '_grd'])
+            print('pairs to be calced:%d' % len(pred_gr_dat))
+
+            prd_comp_feat = \
+                pred_gr_dat[['duns_number_prd']].rename(columns={'duns_number_prd': 'duns_number'}).merge(comp_feat_normed,
+                                                                                                          on='duns_number',
+                                                                                                          how='left')[
+                    comp_feat_col].to_numpy()
+            grd_comp_feat = \
+                pred_gr_dat[['duns_number_grd']].rename(columns={'duns_number_grd': 'duns_number'}).merge(comp_feat_normed,
+                                                                                                          on='duns_number',
+                                                                                                          how='left')[
+                    comp_feat_col].to_numpy()
+
+            prd_comp_feat = normalize(prd_comp_feat, axis=1)
+            grd_comp_feat = normalize(grd_comp_feat, axis=1)
+            dist = 1 - (prd_comp_feat * grd_comp_feat).sum(axis=1).reshape(-1, 1)
+
+            distpd = pd.DataFrame(dist, columns=['dist'])
+
+            pred_gr_dat2 = pd.concat([pred_gr_dat[['atlas_location_uuid', 'duns_number_prd', 'duns_number_grd']], distpd],
+                                     axis=1)
+            pred_gr_dat2.loc[pred_gr_dat2['dist'] < 1e-12, 'dist'] = 1
+            result = pred_gr_dat2.loc[
+                pred_gr_dat2.groupby(['atlas_location_uuid', 'duns_number_prd'])['dist'].idxmin()].reset_index(drop=True)
+
+            result = result[result['dist'] <= self._sim_thresh]
+
+            result = \
+                result.merge(comp_feat[['duns_number', 'business_name']], left_on='duns_number_grd', right_on='duns_number',
+                             how='left',
+                             suffixes=['', '_useless'])[['atlas_location_uuid', 'duns_number_prd', 'business_name', 'dist']]
+            result = result.rename(columns={'business_name': reason_col_name, 'duns_number_prd': 'duns_number'})
+
+            result['dist'] = result['dist'].round(4)
+            result[reason_col_name] = 'There is a similar company already inside: ' + result[
+                reason_col_name] + ' with diff: ' + result[
+                                          'dist'].astype(str) + '. '
+            total_result.append(result)
+
+        result = pd.concat(total_result,axis=0)
+        print('pairs %d' % len(result))
+        return result
+
     def get_reason(self, comp_feat, comp_feat_col, comp_feat_normed, reason_col_name):
         gr_dat = self._gr_dat
         pred_dat = self._pred_dat

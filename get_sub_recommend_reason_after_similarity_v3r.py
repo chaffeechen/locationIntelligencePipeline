@@ -159,6 +159,10 @@ if __name__ == '__main__':
         if args.sampled or (cityname[ind_city] not in ['New York','San Francisco','Los Angeles']):
             recall_com5 = sub_rec_similar_company_v2(comp_loc = comp_loc, sspd = sspd , thresh=0.05)
             sim_comp_name = recall_com5.get_reason(comp_feat=comp_feat,comp_feat_col=comp_feat_col,comp_feat_normed=comp_feat_normed,reason_col_name = reason5 )
+        elif cityname[ind_city] in ['New York','San Francisco','Los Angeles']:
+            recall_com5 = sub_rec_similar_company_v2(comp_loc=comp_loc, sspd=sspd, thresh=0.05)
+            sim_comp_name = recall_com5.get_reason_batch(comp_feat=comp_feat, comp_feat_col=comp_feat_col,
+                                                   comp_feat_normed=comp_feat_normed, reason_col_name=reason5)
 
         print('6. Close to current location')
         recall_com6 = sub_rec_location_distance(reason_col_name=reason6)
@@ -169,12 +173,15 @@ if __name__ == '__main__':
         sample_sspd = pd.merge(sample_sspd, sub_pairs, on=['atlas_location_uuid', 'duns_number'], how='left',
                                suffixes=sfx)
         print('merging...%d'%len(sample_sspd))
+
+        sample_sspd = pd.merge(sample_sspd, sim_comp_name, on=['atlas_location_uuid', 'duns_number'], how='left',
+                                                      suffixes=sfx)
         #2 merge company similarity reason
-        if args.sampled or (cityname[ind_city] not in ['New York','San Francisco','Los Angeles']):
-            sample_sspd = pd.merge(sample_sspd, sim_comp_name, on=['atlas_location_uuid', 'duns_number'], how='left',
-                               suffixes=sfx)
-        else:
-            sample_sspd[reason5] = 'Similar company recommendation reason is skipped for NY/SF/LA.'
+        # if args.sampled or (cityname[ind_city] not in ['New York','San Francisco','Los Angeles']):
+        #     sample_sspd = pd.merge(sample_sspd, sim_comp_name, on=['atlas_location_uuid', 'duns_number'], how='left',
+        #                        suffixes=sfx)
+        # else:
+        #     sample_sspd[reason5] = 'Similar company recommendation reason is skipped for NY/SF/LA.'
 
         print('merging...%d' % len(sample_sspd))
 
