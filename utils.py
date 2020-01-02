@@ -6,6 +6,7 @@ from sklearn.preprocessing import normalize
 from sklearn.preprocessing import OneHotEncoder
 from enum import Enum
 from math import *
+import tqdm
 
 pjoin = os.path.join
 
@@ -73,6 +74,48 @@ def getPosNegdatv2_fast(dat):
 
     # clean pos dat in neg dat
     neg_dat = pd.merge(pot_neg_dat, dat, on=['duns_number', 'atlas_location_uuid'], how='left',
+                       suffixes=['', '_right']).reset_index(drop=True)
+    neg_dat['label'] = neg_dat['label'].fillna(0)
+    neg_dat = neg_dat[neg_dat['label_right'] != 1]
+
+    print('Clean %d neg data into %d real neg data.' % (len(pot_neg_dat), len(neg_dat)))
+
+    res_dat = pd.concat([dat, neg_dat], axis=0).reset_index(drop=True)
+    # res_dat = res_dat.groupby(['duns_number', 'atlas_location_uuid'])['label'].max().reset_index()
+    return res_dat
+
+def getPosNegdatv2_fast_general(dat,colname:dict):
+    """
+    dat: pos pair of data (location,company,geo,distance)
+    return pos/neg pair of data, same structure of dat except one more column for label
+    general version of getPosNegdatv2_fast, need key column inputs
+    colname = {
+        'company':'duns_number',
+        'location':'atlas_location_uuid'
+    }
+    """
+    shuffle_dat = dat.sample(frac=1).reset_index(drop=True)
+    twin_dat = dat.join(shuffle_dat, how='left', lsuffix='_left', rsuffix='_right')
+
+    pot_neg_datA = twin_dat[
+        [ colname['company']+'_left', colname['location'] + '_right']] \
+        .rename(columns={colname['company']+'_left': 'duns_number', colname['location'] + '_right': 'atlas_location_uuid'})
+
+    pot_neg_datB = twin_dat[
+        [colname['company']+'_right', colname['location'] + '_left']] \
+        .rename(columns={colname['company']+'_right': 'duns_number', colname['location'] + '_left': 'atlas_location_uuid'})
+
+    pot_neg_dat = pd.concat([pot_neg_datA, pot_neg_datB], axis=0)
+    pot_neg_dat['label'] = 0
+    dat['label'] = 1
+
+    # col alignment
+    col_list = [colname['company'], colname['location'] , 'label']
+    dat = dat[col_list]
+    pot_neg_dat = pot_neg_dat[col_list]
+
+    # clean pos dat in neg dat
+    neg_dat = pd.merge(pot_neg_dat, dat, on=[colname['company'], colname['location']], how='left',
                        suffixes=['', '_right']).reset_index(drop=True)
     neg_dat['label'] = neg_dat['label'].fillna(0)
     neg_dat = neg_dat[neg_dat['label_right'] != 1]
@@ -756,16 +799,18 @@ class sub_rec_similar_company_v2(object):
 
         batch_iter = ceil(1.0*len(self._pred_dat)/batch_size)
         total_result = []
+        pbar = tqdm.tqdm(total = len(self._pred_dat))
 
         for i in range(batch_iter):
-            print('processing %d of %d'%(i,batch_iter) )
+            # print('processing %d of %d'%(i,batch_iter) )
             bgidx = i*batch_size
             edidx = min( (i+1)*batch_size, len(self._pred_dat) )
+            pbar.update(edidx-bgidx)
             pred_dat = self._pred_dat.iloc[bgidx:edidx]
 
             pred_gr_dat = pred_dat.merge(gr_dat[['atlas_location_uuid', 'duns_number']], on=['atlas_location_uuid'],
                                          how='left', suffixes=['_prd', '_grd'])
-            print('pairs to be calced:%d' % len(pred_gr_dat))
+            # print('pairs to be calced:%d' % len(pred_gr_dat))
 
             prd_comp_feat = \
                 pred_gr_dat[['duns_number_prd']].rename(columns={'duns_number_prd': 'duns_number'}).merge(comp_feat_normed,
@@ -805,6 +850,7 @@ class sub_rec_similar_company_v2(object):
             total_result.append(result)
 
         result = pd.concat(total_result,axis=0)
+        pbar.close()
         print('pairs %d' % len(result))
         return result
 

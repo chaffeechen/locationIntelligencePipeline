@@ -44,7 +44,7 @@ ac_dat = ac_dat[[8,9]]
 ac_dat = ac_dat.rename(columns={8:'AccountId',9:'Name'})
 
 ac_dat.head()
-dnbmtdat2 = pd.read_csv(pjoin(datapath_sf,'op_loc_atlas_city_1210_good.csv'),index_col=0)
+dnbmtdat2 = pd.read_csv(pjoin(datapath_sf,salesforce_file['link_name_atlas_duns']),index_col=0)
 dnbmtdat2 = dnbmtdat2[['op_orig_name','duns_number','dnb_orig_name']].groupby(['op_orig_name','duns_number']).first().reset_index()
 ac_duns_dat = ac_dat.merge(dnbmtdat2,left_on=['Name'],right_on='op_orig_name',suffixes=sfx)
 ac_duns_dat = ac_duns_dat.rename(columns={'op_orig_name':'salesforce_name','dnb_orig_name':'dnb_name'})

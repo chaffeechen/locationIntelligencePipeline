@@ -25,7 +25,6 @@ if __name__ == '__main__':
     arg('--run_root', default='/Users/yefeichen/Database/location_recommender_system/')
     arg('--ls_card',default='location_scorecard_191113.csv')
     arg('--app_date',default='_191114')
-    arg('--ratio',type=float,default=0.8)
     args = parser.parse_args()
 
     datapath = args.run_root
@@ -52,50 +51,20 @@ if __name__ == '__main__':
     # 如果不合并所有数据在进行dummy 会出现一些category在某些城市不出现的情况，从而导致问题
     # 8-2分训练测试集
 
-    train_test_val_pairs = []
     dat_comp_pds = []
     dat_loc_pds = []
 
     pdlls = []  # all location feat pd list
     pdccs = []
     for ind_city in range(5):
+        print('processing city: %s'% citylongname[ind_city])
         pdc = pd.read_csv(pjoin(datapath, cfile[ind_city]))
         pdl = pd.read_csv(pjoin(datapath, lfile))
         pdcl = pd.read_csv(pjoin(datapath, clfile[ind_city]))
 
-        print('generating train_val_test csv')
-        # train_test_val_pairs :[ duns_number, atlas_location_uuid, label, city, fold ]
-        pair_dat = getPosNegdatv2_fast(pdcl)
-        tr, tt = splitdat(pair_dat, key_column=['duns_number', 'atlas_location_uuid'], right_colunm='label_tr',
-                          rate_tr=args.ratio)
-        # training pair ==> pair format with positive only
-
-        pot_pos_dat = pdcl[['duns_number', 'atlas_location_uuid']]
-        pot_pos_dat = pd.merge(pot_pos_dat,tt,on=['duns_number', 'atlas_location_uuid'],how='left',suffixes=['','_right'])
-        train_pos_pair = pot_pos_dat[pot_pos_dat['label'].isnull()]
-        train_pos_pair['label'] = 1
-        ## ATT need acceleration!!!!!
-        # train_pos_pair = \
-        # tr[tr['label'] == 1].groupby(['duns_number', 'atlas_location_uuid', 'label']).first().reset_index()[
-        #     ['duns_number', 'atlas_location_uuid', 'label']]
-
-        # testing pair ==> pair format with positive and negative both
-        testing_pair = tt.reset_index()[['duns_number', 'atlas_location_uuid', 'label']]
-
-        train_pos_pair['fold'] = 0
-        testing_pair['fold'] = 2
-
-        train_test_val_pair = pd.concat([train_pos_pair, testing_pair])
-        train_test_val_pair['city'] = ind_city
-        train_test_val_pairs.append(train_test_val_pair)
-        print(len(train_test_val_pair))
-        print('train_val_test_location_company Done')
-
         # building features
         col_list = list(pdl.columns)
         pdll = pdl.merge(pdcl, how='inner', on=['atlas_location_uuid'], suffixes=['', '_right'])
-        # pdll = pdll[pdll['duns_number'].isnull() == False]
-        pdll = pdll[pdll['duns_number'].notnull()]
         pdll = pdll.groupby(['atlas_location_uuid']).first().reset_index()
         pdll = pdll[col_list]
         pdlls.append(pdll)
@@ -189,10 +158,6 @@ if __name__ == '__main__':
 
     print('Done')
 
-    # print('Final merge...')
-    train_test_val_pair = pd.concat(train_test_val_pairs)
-
-    train_test_val_pair.to_csv(pjoin(datapath, 'train_val_test_location_company_82split' + apps))
     dat_comp_pd.to_csv(pjoin(datapath, 'company_feat' + apps))
     dat_loc_pd.to_csv(pjoin(datapath, 'location_feat' + apps))
     print('All Done')
