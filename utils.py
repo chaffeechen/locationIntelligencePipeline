@@ -751,7 +751,7 @@ class sub_rec_similar_company_v2(object):
         self._pred_dat = sspd
         self._sim_thresh = thresh
 
-    def get_reason_batch(self, comp_feat, comp_feat_col, comp_feat_normed, reason_col_name, batch_size = 100000):
+    def get_reason_batch(self, comp_feat, comp_feat_col, comp_feat_normed, reason_col_name, batch_size = 10000):
         gr_dat = self._gr_dat
 
         batch_iter = ceil(1.0*len(self._pred_dat)/batch_size)

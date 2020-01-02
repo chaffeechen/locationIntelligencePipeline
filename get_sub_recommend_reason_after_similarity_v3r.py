@@ -162,7 +162,7 @@ if __name__ == '__main__':
         elif cityname[ind_city] in ['New York','San Francisco','Los Angeles']:
             recall_com5 = sub_rec_similar_company_v2(comp_loc=comp_loc, sspd=sspd, thresh=0.05)
             sim_comp_name = recall_com5.get_reason_batch(comp_feat=comp_feat, comp_feat_col=comp_feat_col,
-                                                   comp_feat_normed=comp_feat_normed, reason_col_name=reason5)
+                                                   comp_feat_normed=comp_feat_normed, reason_col_name=reason5,batch_size=20000)
 
         print('6. Close to current location')
         recall_com6 = sub_rec_location_distance(reason_col_name=reason6)
