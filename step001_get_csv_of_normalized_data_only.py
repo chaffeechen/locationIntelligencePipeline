@@ -43,8 +43,8 @@ if __name__ == '__main__':
     key_col_comp = feature_column['key_col_comp']
     key_col_loc = feature_column['key_col_loc']
 
-    dummy_col_nameL = feature_column['dummy_col_nameC']
-    dummy_col_nameC = feature_column['dummy_col_nameL']
+    dummy_col_nameL = feature_column['dummy_col_nameL']
+    dummy_col_nameC = feature_column['dummy_col_nameC']
 
 
     ##Multi training data generator(multi city)
