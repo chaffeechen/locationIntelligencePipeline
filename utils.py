@@ -535,7 +535,7 @@ class feature_translate_of_locaiton_similar_in(object):
         self.col2phs['num_retail_stores'] = (
             featsrc.location, 'There are enough retail stores in this region as your current one')
         self.col2phs['num_doctor_offices'] = (
-            featsrc.location, 'the medical service in this location is as good as your current location')
+            featsrc.location, 'The medical service in this location is as good as your current location')
         self.col2phs[('num_eating_places', 'num_drinking_places')] = (
             featsrc.location, 'Eating and drinking are as convenient as your current location')
         self.col2phs['num_hotels'] = (
@@ -563,7 +563,7 @@ class feature_translate_of_locaiton_similar_in(object):
             'This location is as easily accessible by bike as your current location')
         self.col2phs['num_emp_weworkcore'] = (
             featsrc.location,
-            'the employee statistics, especially the number of employees in the core industry, in this location is similar to your current location, and will meet your hiring needs')
+            'The employee statistics, especially the number of employees in the core industry, in this location is similar to your current location, and will meet your hiring needs')
         self.col2phs['num_poi_weworkcore'] = (
             featsrc.location,
             'The business environment, especially the number of core businesses relevant to your company, in this area is similar to your current location, and will meet your business development needs')
