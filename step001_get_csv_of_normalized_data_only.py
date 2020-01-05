@@ -34,7 +34,7 @@ if __name__ == '__main__':
     lfile = args.ls_card  # It is fixed as input
     clfile = [c + apps for c in cityabbr]
 
-    print('Args:',datapath,apps,lfile,args.ratio)
+    # print('Args:',datapath,apps,lfile,args.ratio)
 
     not_feat_col = feature_column['not_feat_col']
     cont_col_nameC = feature_column['cont_col_nameC']
