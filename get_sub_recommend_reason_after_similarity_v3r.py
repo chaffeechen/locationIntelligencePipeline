@@ -25,6 +25,7 @@ if __name__ == '__main__':
     arg('--apps',type=str,default='_191114.csv')
     arg('--sampled',action='store_true',help='is similarity score sampled?')
     arg('--ww',action='store_true',help='is ww building only?')
+    arg('--tt',action='store_true',help='doing test for 1 city only')
 
     args = parser.parse_args()
 
@@ -59,7 +60,13 @@ if __name__ == '__main__':
 
     wework_location_only = args.ww
 
+    if args.tt:
+        print('#####Attention#####')
+        print('This is TEST mode only. Not PROD-DEV.')
+
     for ind_city in range(5):
+        if args.tt and ind_city != 2:
+            continue
         print('##city: %s processing##'%cityname[ind_city])
         comp_feat = pd.read_csv(pjoin(datapath, cfile[ind_city]))
         comp_loc = pd.read_csv(pjoin(datapath, clfile[ind_city]))
