@@ -112,18 +112,18 @@ if __name__ == '__main__':
         # Reason2:
         print('2. Location based Reason')
         recall_com2 = sub_rec_condition(sub_loc_feat)
-        sub_loc_recall_com2 = recall_com2.exfiltering('num_fitness_gyms', percentile=0.5, reason='there are enough gyms to work out',reason_col_name=reason2)
+        sub_loc_recall_com2 = recall_com2.exfiltering('num_fitness_gyms', percentile=0.5, reason='There are enough gyms to work out',reason_col_name=reason2)
         sub_loc_recall_com3 = recall_com2.exfiltering('num_drinking_places', percentile=0.5,
-                                                      reason='there are enough bars to have a drink', reason_col_name=reason2)
-        sub_loc_recall_com4 = recall_com2.exfiltering('num_eating_places', percentile=0.5, reason='there are enough restaurants to get food',reason_col_name=reason2)
+                                                      reason='There are enough bars to have a drink', reason_col_name=reason2)
+        sub_loc_recall_com4 = recall_com2.exfiltering('num_eating_places', percentile=0.5, reason='There are enough restaurants to get food',reason_col_name=reason2)
         print('recall_location_size: %d, %d, %d' % (
         len(sub_loc_recall_com2), len(sub_loc_recall_com3), len(sub_loc_recall_com4.shape)))
 
         print('Merging general reasons')
         sub_loc_recall = pd.concat([sub_loc_recall_com2, sub_loc_recall_com3, sub_loc_recall_com4], axis=0)
-        # explanar:
+        # explanar:merge_rec_reason_rowise 需要在结尾加"."
         sub_loc_recall = merge_rec_reason_rowise(sub_loc_recall, group_cols=['atlas_location_uuid'],
-                                                 merge_col=reason2,sep='| ')
+                                                 merge_col=reason2,sep='. ')
         sub_loc_recall[reason2] = 'This building is at a location with great amenities: ' + sub_loc_recall[reason2] + '. '
 
         if wework_location_only:

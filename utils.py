@@ -585,34 +585,34 @@ class feature_translate(object):
     def init_dict(self):
         # company
         self.col2phs['emp_here'] = (
-        featsrc.company, 'this location matches the amount of employees your company plans to hire locally')
+        featsrc.company, 'This location matches the amount of employees your company plans to hire locally')
         # self.col2phs['emp_here_range'] = (featsrc.company, 'local employee number') avoid for duplicating reason, leave it to dummy category
         self.col2phs['emp_total'] = (
-        featsrc.company, 'companies with similar size as yours also has an office in this location')
-        self.col2phs['sales_volume_us'] = (featsrc.company, 'this location can supply the sales volume of the company')
+        featsrc.company, 'Companies with similar size as yours also has an office in this location')
+        self.col2phs['sales_volume_us'] = (featsrc.company, 'This location can supply the sales volume of the company')
         self.col2phs['location_type'] = (
-        featsrc.company, 'this location can provide the office type demanded by your company')
+        featsrc.company, 'This location can provide the office type demanded by your company')
         self.col2phs['square_footage'] = (
-        featsrc.company, 'this location can match the expected square footage of your company')
+        featsrc.company, 'This location can match the expected square footage of your company')
         self.col2phs['primary_sic_2'] = (
-        featsrc.company, 'this location is good for the industry type of your business')
+        featsrc.company, 'This location is good for the industry type of your business')
         # building
         self.col2phs['score_predicted_eo'] = (featsrc.location, 'a high predicted score of economic occupancy')
         self.col2phs['building_class'] = (featsrc.location, 'a high quality of facilities')
         # region
-        self.col2phs['num_retail_stores'] = (featsrc.region, 'shopping amenities is enough for your company')
-        self.col2phs['num_doctor_offices'] = (featsrc.region, 'health amenities is enough for your company')
-        self.col2phs['num_eating_places'] = (featsrc.region, 'eating amenities is enough for your company')
-        self.col2phs['num_drinking_places'] = (featsrc.region, 'relaxing amenities is enough for your company')
-        self.col2phs['num_hotels'] = (featsrc.region, 'hotel amenities is enough for your company')
-        self.col2phs['num_fitness_gyms'] = (featsrc.region, 'gym amenities is enough for your company')
-        self.col2phs['population_density'] = (featsrc.region, 'population density is suitable for your company')
-        self.col2phs['pct_female_population'] = (featsrc.region, 'gender diversity is suitable for your company')
-        self.col2phs['median_age'] = (featsrc.region, 'age distribution of the population meets the need of your company')
-        self.col2phs['income_per_capita'] = (featsrc.region, 'income level is adequate to your company')
-        self.col2phs['pct_masters_degree'] = (featsrc.region, 'education degree meets the need of your company')
-        self.col2phs['walk_score'] = (featsrc.region, 'it is walking friendly')
-        self.col2phs['bike_score'] = (featsrc.region, 'it is biking friendly')
+        self.col2phs['num_retail_stores'] = (featsrc.region, 'Shopping amenities is enough for your company')
+        self.col2phs['num_doctor_offices'] = (featsrc.region, 'Health amenities is enough for your company')
+        self.col2phs['num_eating_places'] = (featsrc.region, 'Eating amenities is enough for your company')
+        self.col2phs['num_drinking_places'] = (featsrc.region, 'Relaxing amenities is enough for your company')
+        self.col2phs['num_hotels'] = (featsrc.region, 'Hotel amenities is enough for your company')
+        self.col2phs['num_fitness_gyms'] = (featsrc.region, 'Gym amenities is enough for your company')
+        self.col2phs['population_density'] = (featsrc.region, 'Population density is suitable for your company')
+        self.col2phs['pct_female_population'] = (featsrc.region, 'Gender diversity is suitable for your company')
+        self.col2phs['median_age'] = (featsrc.region, 'Age distribution of the population meets the need of your company')
+        self.col2phs['income_per_capita'] = (featsrc.region, 'Income level is adequate to your company')
+        self.col2phs['pct_masters_degree'] = (featsrc.region, 'Education degree meets the need of your company')
+        self.col2phs['walk_score'] = (featsrc.region, 'It is walking friendly')
+        self.col2phs['bike_score'] = (featsrc.region, 'It is biking friendly')
 
     def getItem(self, gvkey):
         # precision matching
@@ -693,7 +693,7 @@ class feature_translate(object):
             comp_phs = ''
 
         if loc_lst:
-            loc_phs = self.merge_lst(loc_lst, pre_phs='this location has', post_phs='')
+            loc_phs = self.merge_lst(loc_lst, pre_phs='This location has', post_phs='')
         else:
             loc_phs = ''
 
@@ -703,7 +703,7 @@ class feature_translate(object):
             region_phs = ''
 
         # print(comp_phs,loc_phs,region_phs)
-        final_phs = self.merge_phs([comp_phs, loc_phs, region_phs],sep='| ')
+        final_phs = self.merge_phs([comp_phs, loc_phs, region_phs],sep='. ')
         if final_phs:
             return 'Implicit reason: ' + final_phs + '.'
         else:
@@ -762,11 +762,11 @@ class sub_rec_similar_location(object):
                     loc_comp_loc[self.reason_col_name].str.cat(tmp['reason'], join='left', sep='|', na_rep='')
 
         def clean(text):  # problem caused by str.cat. Thus clean is a must.
-            clean_str = '| '.join([c for c in text.split('|') if c != ''])
+            clean_str = '. '.join([c for c in text.split('|') if c != ''])
             return clean_str
 
         def cnter(text):
-            ns = text.count('|')
+            ns = text.count('.')
             return ns
 
         loc_comp_loc[self.reason_col_name] = loc_comp_loc[self.reason_col_name].apply(lambda text: clean(text))
