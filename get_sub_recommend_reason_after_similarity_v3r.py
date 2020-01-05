@@ -28,6 +28,7 @@ if __name__ == '__main__':
     arg('--tt',action='store_true',help='doing test for 1 city only')
 
     args = parser.parse_args()
+    testcode = 2
 
     datapath = args.run_root
     cfile = origin_comp_file
@@ -65,7 +66,7 @@ if __name__ == '__main__':
         print('This is TEST mode only. Not PROD-DEV.')
 
     for ind_city in range(5):
-        if args.tt and ind_city != 2:
+        if args.tt and ind_city != testcode:
             continue
         print('##city: %s processing##'%cityname[ind_city])
         comp_feat = pd.read_csv(pjoin(datapath, cfile[ind_city]))
@@ -255,10 +256,13 @@ if __name__ == '__main__':
 
 ##merging files
 print('merging results')
-dfs = []
-for filename in ssfile:
-    dfs.append(pd.read_csv('sub_'+filename,index_col=0))
-dfs = pd.concat(dfs,axis=0).reset_index(drop=True)
+if args.tt:
+    dfs = pd.read_csv('sub_'+ssfile[testcode],index_col=0)
+else:
+    dfs = []
+    for filename in ssfile:
+        dfs.append(pd.read_csv('sub_'+filename,index_col=0))
+    dfs = pd.concat(dfs,axis=0).reset_index(drop=True)
 
 loc_df = dfs.groupby('atlas_location_uuid',sort=True)[['atlas_location_uuid']].first().reset_index(drop=True)
 
