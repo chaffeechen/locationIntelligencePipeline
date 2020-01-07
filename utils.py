@@ -1012,7 +1012,8 @@ class sub_rec_inventory_bom(object):
         cid = self.cid
         sfx = ['','_right']
         clpair = sspd[[bid, cid]]
-        clpair = clpair.merge(comp_feat[[cid, comp_col]], on=cid, suffixes=sfx, how='left').merge(self.invdb, on=bid,
+        comp_feat = comp_feat[[cid,comp_col]]
+        clpair = clpair.merge(comp_feat[[cid, comp_col]].fillna(0), on=cid, suffixes=sfx, how='left').merge(self.invdb, on=bid,
                                                                                                   suffixes=sfx)
-        clpair[reason_col] = clpair.apply(lambda x: self.reason if x[comp_col] <= x[inv_col] else '', axis=1)
+        clpair[reason_col] = clpair.apply(lambda x: self.reason if int(x[comp_col]) <= int(x[inv_col]) else '', axis=1)
         return clpair[[cid, bid, reason_col]]
