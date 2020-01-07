@@ -212,11 +212,12 @@ if __name__ == '__main__':
 
         sample_sspd = sspd
         print('Merging reasons')
-        for col_name in reason_col_name:
+        for col_name,priority in reason_col_name:
             sample_sspd = sample_sspd.merge(reason_db[col_name], on=[bid, cid], how='left', suffixes=sfx)
 
         print('Json format transforming...')
         sorted_reason_col_name = sorted(reason_col_name, key=lambda x: x[1])
+        sorted_reason_col_name = [c[0] for c in sorted_reason_col_name]
         sample_sspd['reason'] = sample_sspd.apply(
             lambda x: merge_str_2_json_rowise_reformat(row=x, src_cols=sorted_reason_col_name, jsKey='reasons',
                                                        target_phss=['Location similar in: ', 'Implicit reason: ']),
