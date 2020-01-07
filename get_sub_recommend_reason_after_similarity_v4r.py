@@ -216,6 +216,7 @@ if __name__ == '__main__':
             match_key = list(set([bid,cid]) & set(reason_db[col_name].columns)) #sometimes only location uuid is given
             sample_sspd = sample_sspd.merge(reason_db[col_name], on=match_key, how='left', suffixes=sfx)
 
+        sample_sspd = sample_sspd.fillna('')
         print('Json format transforming...')
         sorted_reason_col_name = sorted(reason_col_name, key=lambda x: x[1])
         sorted_reason_col_name = [c[0] for c in sorted_reason_col_name]

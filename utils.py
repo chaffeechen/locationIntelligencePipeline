@@ -486,7 +486,7 @@ def merge_str_2_json_rowise_reformat(row, src_cols:list, jsKey = 'reasons',targe
     nreason = []
     for src_col in src_cols:
         rs = str(row[src_col])
-        if rs != '':
+        if rs:
             need_reformat = False
             for target_phs in target_phss:
                 if rs.startswith(target_phs):
