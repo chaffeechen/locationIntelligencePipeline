@@ -213,7 +213,8 @@ if __name__ == '__main__':
         sample_sspd = sspd
         print('Merging reasons')
         for col_name,priority in reason_col_name:
-            sample_sspd = sample_sspd.merge(reason_db[col_name], on=[bid, cid], how='left', suffixes=sfx)
+            match_key = list(set([bid,cid]) & set(reason_db[col_name].columns)) #sometimes only location uuid is given
+            sample_sspd = sample_sspd.merge(reason_db[col_name], on=match_key, how='left', suffixes=sfx)
 
         print('Json format transforming...')
         sorted_reason_col_name = sorted(reason_col_name, key=lambda x: x[1])
