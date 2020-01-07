@@ -995,3 +995,24 @@ class sub_rec_location_distance(object):
         loc_comp_loc = loc_comp_loc.loc[loc_comp_loc['geo_dist'] <= dist_thresh,:]
         loc_comp_loc[self.reason_col_name] = 'Recommended location is close to current location(<' + str(round(dist_thresh / 1e3, 1)) + 'km). '
         return loc_comp_loc[[bid, cid, self.reason_col_name]]
+
+## Inventory bom
+
+class sub_rec_inventory_bom(object):
+    def __init__(self, invdb, reason='Inventory reason: This available space of this location can hold your company.',bid='atlas_location_uuid',cid='duns_number'):
+        self.invdb = invdb.sort_values([bid, 'report_month']) \
+            .drop_duplicates([bid], keep='last')
+        self.reason = reason
+        self.bid = bid
+        self.cid = cid
+
+    def get_reason(self, sspd, comp_feat, comp_col='emp_here', inv_col='sum_reservable_office_capacity',
+                   reason_col='inventory'):
+        bid = self.bid
+        cid = self.cid
+        sfx = ['','_right']
+        clpair = sspd[[bid, cid]]
+        clpair = clpair.merge(comp_feat[[cid, comp_col]], on=cid, suffixes=sfx, how='left').merge(self.invdb, on=bid,
+                                                                                                  suffixes=sfx)
+        clpair[reason_col] = clpair.apply(lambda x: self.reason if x[comp_col] <= x[inv_col] else '', axis=1)
+        return clpair[[cid, bid, reason_col]]

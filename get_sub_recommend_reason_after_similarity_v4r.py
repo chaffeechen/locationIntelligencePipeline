@@ -79,11 +79,12 @@ if __name__ == '__main__':
     """
     reason_col_name = [
         ('reason_similar_biz', 1),  # sub_pairs
-        ('reason_location_based', 4),  # sub_loc_recall
-        ('reason_model_based', 6),  # dlsubdat
-        ('reason_similar_location', 3),
-        ('reason_closest_company', 2),
-        ('reason_close_2_current_location', 5),
+        ('reason_location_based', 6),  # sub_loc_recall
+        ('reason_model_based', 7),  # dlsubdat
+        ('reason_similar_location', 5),
+        ('reason_similar_company', 4),
+        ('reason_close_2_current_location', 2),
+        ('reason_inventory_bom',3),
     ]
 
     if args.tt:
@@ -223,6 +224,14 @@ if __name__ == '__main__':
             sub_close_loc = recall_com6.get_reason(sspd=sspd, loc_feat=loc_feat, comp_feat=comp_feat, dist_thresh=3.2e3)
             reason_db[sub_reason_col_name] = sub_close_loc
 
+            print('7. Inventory bom')
+            sub_reason_col_name = reason_col_name[6][0]
+            invdb = pd.read_csv(pjoin(datapath, inventory_file))
+            recall_com7 = sub_rec_inventory_bom(invdb = invdb, reason='Inventory reason: This available space of this location can hold your company.',bid=bid,cid=cid)
+            sub_inventory_db = recall_com7.get_reason(sspd=sspd,comp_feat=comp_feat,comp_col='emp_here',inv_col='max_reservable_capacity',reason_col=sub_reason_col_name)
+            reason_db[sub_reason_col_name] = sub_inventory_db
+            print('==> Total pairs generated:%d'%len(sub_inventory_db))
+
             sample_sspd = sspd
             print('Merging reasons')
             for col_name,priority in reason_col_name:
@@ -286,4 +295,4 @@ if not args.nomerge:
 
     print('Done!')
 else:
-    print('Done without merging!')
+    print('Done without merging, only mid files are generated!')
