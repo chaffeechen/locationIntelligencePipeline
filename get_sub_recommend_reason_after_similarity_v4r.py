@@ -263,6 +263,9 @@ dfs = dfs[['company_id', 'similarity', 'note', 'algorithm', 'atlas_location_uuid
 col_list = ['company_id', 'building_id', 'similarity', 'note', 'algorithm', 'atlas_location_uuid']
 dfs = dfs[col_list]
 
-dfs.to_csv('sub_all_similarity_multi.csv', index=False)
+if args.tt:
+    dfs.to_csv('sub_all_similarity_multi_test.csv', index=False)
+else:
+    dfs.to_csv('sub_all_similarity_multi.csv', index=False)
 
 print('Done!')
