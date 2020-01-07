@@ -865,12 +865,12 @@ class sub_rec_similar_company_v2(object):
                                          how='left', suffixes=['_prd', '_grd'])
 
             prd_comp_feat = \
-                pred_gr_dat[[cid]].rename(columns={cid + '_prd': cid}).merge(comp_feat_normed,
+                pred_gr_dat[[cid]+'_prd'].rename(columns={cid + '_prd': cid}).merge(comp_feat_normed,
                                                                              on=cid,
                                                                              how='left')[
                     comp_feat_col].to_numpy()
             grd_comp_feat = \
-                pred_gr_dat[[cid]].rename(columns={cid + '_grd': cid}).merge(comp_feat_normed,
+                pred_gr_dat[[cid]+'_grd'].rename(columns={cid + '_grd': cid}).merge(comp_feat_normed,
                                                                              on=cid,
                                                                              how='left')[
                     comp_feat_col].to_numpy()
