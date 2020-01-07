@@ -227,7 +227,7 @@ if __name__ == '__main__':
             print('7. Inventory bom')
             sub_reason_col_name = reason_col_name[6][0]
             invdb = pd.read_csv(pjoin(datapath, inventory_file))
-            recall_com7 = sub_rec_inventory_bom(invdb = invdb, reason='Inventory reason: This available space of this location can hold your company.',bid=bid,cid=cid)
+            recall_com7 = sub_rec_inventory_bom(invdb = invdb, reason='Inventory reason: The available space of this location can hold your company.',bid=bid,cid=cid)
             sub_inventory_db = recall_com7.get_reason(sspd=sspd,comp_feat=comp_feat,comp_col='emp_here',inv_col='max_reservable_capacity',reason_col=sub_reason_col_name)
             reason_db[sub_reason_col_name] = sub_inventory_db
             print('==> Total pairs generated:%d'%len(sub_inventory_db))
