@@ -43,6 +43,7 @@ if __name__ == '__main__':
         print('Only %s will be generated'%citylongname[singlecode])
 
     datapath = args.run_root
+    datapath_mid = pjoin(datapath,'reason_table')
     cfile = origin_comp_file
     lfile = args.ls_card
     clfile = [c + args.apps for c in cityabbr]
@@ -133,12 +134,16 @@ if __name__ == '__main__':
                                         suffixes=sfx)  # multi comp loc
 
             sspd = pd.read_csv(pjoin(datapath, ssfile[ind_city]), index_col=0)
-            print('Loading %d similarity score pairs' % len(sspd))
+            total_pairs_num = len(sspd)
+            print('Loading %d similarity score pairs' % total_pairs_num )
 
             print('Begin generating reasons')
             # Reason 1:
             print('1. Is there a company with similar biz inside the location?')
             sub_reason_col_name,_,usedFLG = reason_col_name[0]
+            sub_reason_file_name = cityabbr[ind_city] + '_' + sub_reason_col_name + args.apps
+            sub_reason_file = pjoin(datapath_mid,sub_reason_col_name)
+
             if usedFLG:
                 matching_col = 'primary_sic_2_digit_v2'  # matching_col = 'major_industry_category'
                 query_comp_loc = sspd[[bid, cid]]
@@ -153,13 +158,21 @@ if __name__ == '__main__':
                 sub_pairs[
                     sub_reason_col_name] = 'This location has a tenant company which is in the same industry as your company.'
                 reason_db[sub_reason_col_name] = sub_pairs
-                print('==> Total pairs generated: %d' % len(sub_pairs))
+                print('==> Coverage: %1.2f' % (len(reason_db[sub_reason_col_name])/total_pairs_num) )
+                reason_db[sub_reason_col_name].to_csv(sub_reason_file)
             else:
-                print('==> Skip')
+                if os.path.isfile( sub_reason_file ):
+                    reason_db[sub_reason_col_name] = pd.read_csv(sub_reason_file,index_col=0)
+                    print('==> Load existing result with coverage: %1.2f' % (len(reason_db[sub_reason_col_name])/total_pairs_num) )
+                else:
+                    print('==> Skip')
 
             # Reason2:
             print('2. How is region?(Location based reason)')
             sub_reason_col_name, _, usedFLG = reason_col_name[1]
+            sub_reason_file_name = cityabbr[ind_city] + '_' + sub_reason_col_name + args.apps
+            sub_reason_file = pjoin(datapath_mid,sub_reason_col_name)
+
             if usedFLG:
                 recall_com2 = sub_rec_condition(sub_loc_feat, bid=bid)
                 sub_loc_recall_com2 = recall_com2.exfiltering('num_fitness_gyms', percentile=0.5,
@@ -185,28 +198,45 @@ if __name__ == '__main__':
                 sub_loc_recall[sub_reason_col_name] = 'This building is at a location with great amenities: ' + sub_loc_recall[
                     sub_reason_col_name] + '. '
 
-                print('sub_loc_recall sized %d' % len(sub_loc_recall))
                 reason_db[sub_reason_col_name] = sub_loc_recall
+                print('==> Coverage: %1.2f' % (len(reason_db[sub_reason_col_name]) / total_pairs_num))
+                reason_db[sub_reason_col_name].to_csv(sub_reason_file)
             else:
-                print('==> Skip')
+                if os.path.isfile( sub_reason_file ):
+                    reason_db[sub_reason_col_name] = pd.read_csv(sub_reason_file,index_col=0)
+                    print('==> Load existing result with coverage: %1.2f' % (len(reason_db[sub_reason_col_name]) / total_pairs_num))
+                else:
+                    print('==> Skip')
 
             # Reason3: Tag!!!!
             print('3. Model based Reason(Implicit reason)')
             sub_reason_col_name, _, usedFLG = reason_col_name[2]
+            sub_reason_file_name = cityabbr[ind_city] + '_' + sub_reason_col_name + args.apps
+            sub_reason_file = pjoin(datapath_mid,sub_reason_col_name)
+
             if usedFLG:
                 featTranslator = feature_translate()
                 dlsubdat = pd.read_csv(pjoin(datapath, dlsub_ssfile[ind_city]), index_col=0)
                 dlsubdat[sub_reason_col_name] = dlsubdat.apply(lambda row: featTranslator.make_sense(row['merged_feat']),
                                                                axis=1)
                 dlsubdat = dlsubdat[[bid, cid, sub_reason_col_name]]
-                print('==> Total pairs generated: %d' % len(dlsubdat))
+
                 reason_db[sub_reason_col_name] = dlsubdat
+                print('==> Coverage: %1.2f' % (len(reason_db[sub_reason_col_name]) / total_pairs_num))
+                reason_db[sub_reason_col_name].to_csv(sub_reason_file)
             else:
-                print('==> Skip')
+                if os.path.isfile(sub_reason_file):
+                    reason_db[sub_reason_col_name] = pd.read_csv(sub_reason_file, index_col=0)
+                    print('==> Load existing result with coverage: %1.2f' % (len(reason_db[sub_reason_col_name]) / total_pairs_num))
+                else:
+                    print('==> Skip')
 
 
             print('4. Is the recommended location similar with its current one?')
             sub_reason_col_name, _, usedFLG = reason_col_name[3]
+            sub_reason_file_name = cityabbr[ind_city] + '_' + sub_reason_col_name + args.apps
+            sub_reason_file = pjoin(datapath_mid,sub_reason_col_name)
+
             if usedFLG:
                 cont_col_nameL = feature_column['cont_col_nameL']
                 dummy_col_nameL = feature_column['dummy_col_nameL']
@@ -215,49 +245,78 @@ if __name__ == '__main__':
                 loc_comp_loc = recall_com4.get_reason(sspd=sspd, comp_loc=comp_loc, loc_feat=loc_feat,
                                                       reason='Location similar in: ', multi_flag=True)
                 reason_db[sub_reason_col_name] = loc_comp_loc
+                print('==> Coverage: %1.2f' % (len(reason_db[sub_reason_col_name]) / total_pairs_num))
+                reason_db[sub_reason_col_name].to_csv(sub_reason_file)
             else:
-                print('==> Skip')
+                if os.path.isfile(sub_reason_file):
+                    reason_db[sub_reason_col_name] = pd.read_csv(sub_reason_file, index_col=0)
+                    print('==> Load existing result with coverage: %1.2f' % (len(reason_db[sub_reason_col_name]) / total_pairs_num))
+                else:
+                    print('==> Skip')
 
             print('5. Is there a similar company inside the recommended location?')
             sub_reason_col_name, _, usedFLG = reason_col_name[4]
+            sub_reason_file_name = cityabbr[ind_city] + '_' + sub_reason_col_name + args.apps
+            sub_reason_file = pjoin(datapath_mid,sub_reason_col_name)
+
             if usedFLG:
-                if args.sampled or (cityname[ind_city] not in ['New York', 'San Francisco', 'Los Angeles']):
-                    recall_com5 = sub_rec_similar_company_v2(comp_loc=comp_loc, sspd=sspd, thresh=0.05, bid=bid, cid=cid)
-                    sim_comp_name = recall_com5.get_reason(comp_feat=comp_feat, comp_feat_col=comp_feat_col,
-                                                           comp_feat_normed=comp_feat_normed,
-                                                           reason_col_name=sub_reason_col_name)
-                elif cityname[ind_city] in ['New York', 'San Francisco', 'Los Angeles']:
-                    recall_com5 = sub_rec_similar_company_v2(comp_loc=comp_loc, sspd=sspd, thresh=0.05)
-                    sim_comp_name = recall_com5.get_reason_batch(comp_feat=comp_feat, comp_feat_col=comp_feat_col,
-                                                                 comp_feat_normed=comp_feat_normed,
-                                                                 reason_col_name=sub_reason_col_name, batch_size=5000)
-                print('==> Total pairs generated: %d' % len(sim_comp_name))
+                recall_com5 = sub_rec_similar_company_v2(comp_loc=comp_loc, sspd=sspd, thresh=0.05)
+                sim_comp_name = recall_com5.get_reason_batch(comp_feat=comp_feat, comp_feat_col=comp_feat_col,
+                                                             comp_feat_normed=comp_feat_normed,
+                                                             reason_col_name=sub_reason_col_name, batch_size=5000)
                 reason_db[sub_reason_col_name] = sim_comp_name
+                print('==> Coverage: %1.2f' % (len(reason_db[sub_reason_col_name]) / total_pairs_num))
+                reason_db[sub_reason_col_name].to_csv(sub_reason_file)
             else:
-                print('==> Skip')
+                if os.path.isfile(sub_reason_file):
+                    reason_db[sub_reason_col_name] = pd.read_csv(sub_reason_file, index_col=0)
+                    print('==> Load existing result with coverage: %1.2f' % (
+                    len(reason_db[sub_reason_col_name]) / total_pairs_num))
+                else:
+                    print('==> Skip')
 
             print('6. Close to current location')
             sub_reason_col_name, _, usedFLG = reason_col_name[5]
+            sub_reason_file_name = cityabbr[ind_city] + '_' + sub_reason_col_name + args.apps
+            sub_reason_file = pjoin(datapath_mid,sub_reason_col_name)
+
             if usedFLG:
                 recall_com6 = sub_rec_location_distance(reason_col_name=sub_reason_col_name)
                 sub_close_loc = recall_com6.get_reason(sspd=sspd, loc_feat=loc_feat, comp_feat=comp_feat, dist_thresh=3.2e3)
                 reason_db[sub_reason_col_name] = sub_close_loc
+                print('==> Coverage: %1.2f' % (len(reason_db[sub_reason_col_name]) / total_pairs_num))
+                reason_db[sub_reason_col_name].to_csv(sub_reason_file)
             else:
-                print('==> Skip')
+                if os.path.isfile(sub_reason_file):
+                    reason_db[sub_reason_col_name] = pd.read_csv(sub_reason_file, index_col=0)
+                    print('==> Load existing result with coverage: %1.2f' % (len(reason_db[sub_reason_col_name]) / total_pairs_num))
+                else:
+                    print('==> Skip')
 
             print('7. Inventory bom')
             sub_reason_col_name, _, usedFLG = reason_col_name[6]
+            sub_reason_file_name = cityabbr[ind_city] + '_' + sub_reason_col_name + args.apps
+            sub_reason_file = pjoin(datapath_mid,sub_reason_col_name)
+
             if usedFLG:
                 invdb = pd.read_csv(pjoin(datapath, inventory_file))
                 recall_com7 = sub_rec_inventory_bom(invdb = invdb, reason='Inventory reason: The available space of this location can hold your company.',bid=bid,cid=cid)
                 sub_inventory_db = recall_com7.get_reason(sspd=sspd,comp_feat=comp_feat,comp_col='emp_here',inv_col='max_reservable_capacity',reason_col=sub_reason_col_name)
                 reason_db[sub_reason_col_name] = sub_inventory_db
-                print('==> Total pairs generated:%d'%len(sub_inventory_db))
+                print('==> Coverage: %1.2f' % (len(reason_db[sub_reason_col_name]) / total_pairs_num))
+                reason_db[sub_reason_col_name].to_csv(sub_reason_file)
             else:
-                print('==> Skip')
+                if os.path.isfile(sub_reason_file):
+                    reason_db[sub_reason_col_name] = pd.read_csv(sub_reason_file, index_col=0)
+                    print('==> Load existing result with coverage: %1.2f' % (len(reason_db[sub_reason_col_name]) / total_pairs_num))
+                else:
+                    print('==> Skip')
 
             print('8. Compstak')
             sub_reason_col_name,_,usedFLG = reason_col_name[7]
+            sub_reason_file_name = cityabbr[ind_city] + '_' + sub_reason_col_name + args.apps
+            sub_reason_file = pjoin(datapath_mid,sub_reason_col_name)
+
             if usedFLG:
                 compstak_db_city = compstak_db.loc[compstak_db['city']==cityname[ind_city],:]
                 compstak_dnb_city = compstak_dnb.loc[compstak_dnb['city'] == cityname[ind_city], :]
@@ -266,9 +325,14 @@ if __name__ == '__main__':
                                                cid=cid,bid=bid)
                 sub_compstak_db = recall_com8.get_reason(sspd=sspd,reason_col=sub_reason_col_name)
                 reason_db[sub_reason_col_name] = sub_compstak_db
-                print('==> Total pairs generated:%d'%len(sub_compstak_db))
+                print('==> Coverage: %1.2f' % (len(reason_db[sub_reason_col_name]) / total_pairs_num))
+                reason_db[sub_reason_col_name].to_csv(sub_reason_file)
             else:
-                print('==> Skip')
+                if os.path.isfile(sub_reason_file):
+                    reason_db[sub_reason_col_name] = pd.read_csv(sub_reason_file, index_col=0)
+                    print('==> Load existing result with coverage: %1.2f' % (len(reason_db[sub_reason_col_name]) / total_pairs_num))
+                else:
+                    print('==> Skip')
 
             """
             Merge reason for each city
@@ -302,18 +366,18 @@ if __name__ == '__main__':
 
             print(len(sample_sspd))
 
-            sample_sspd.to_csv('sub_' + ssfile[ind_city])
+            sample_sspd.to_csv(pjoin(datapath_mid,'sub_' + ssfile[ind_city]))
 
 ##merging files
 
 if not args.nomerge:
     print('merging results')
     if args.tt:
-        dfs = pd.read_csv('sub_' + ssfile[testcode], index_col=0)
+        dfs = pd.read_csv(pjoin(datapath_mid,'sub_' + ssfile[testcode]), index_col=0)
     else:
         dfs = []
         for filename in ssfile:
-            dfs.append(pd.read_csv('sub_' + filename, index_col=0))
+            dfs.append(pd.read_csv(pjoin(datapath_mid,'sub_' + filename), index_col=0))
         dfs = pd.concat(dfs, axis=0).reset_index(drop=True)
 
     loc_df = dfs.groupby(bid, sort=True)[[bid]].first().reset_index(drop=True)
