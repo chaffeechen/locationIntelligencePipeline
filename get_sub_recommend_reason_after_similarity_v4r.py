@@ -142,7 +142,7 @@ if __name__ == '__main__':
             print('1. Is there a company with similar biz inside the location?')
             sub_reason_col_name,_,usedFLG = reason_col_name[0]
             sub_reason_file_name = cityabbr[ind_city] + '_' + sub_reason_col_name + args.apps
-            sub_reason_file = pjoin(datapath_mid,sub_reason_col_name)
+            sub_reason_file = pjoin(datapath_mid,sub_reason_file_name)
 
             if usedFLG:
                 matching_col = 'primary_sic_2_digit_v2'  # matching_col = 'major_industry_category'
@@ -171,7 +171,7 @@ if __name__ == '__main__':
             print('2. How is region?(Location based reason)')
             sub_reason_col_name, _, usedFLG = reason_col_name[1]
             sub_reason_file_name = cityabbr[ind_city] + '_' + sub_reason_col_name + args.apps
-            sub_reason_file = pjoin(datapath_mid,sub_reason_col_name)
+            sub_reason_file = pjoin(datapath_mid,sub_reason_file_name)
 
             if usedFLG:
                 recall_com2 = sub_rec_condition(sub_loc_feat, bid=bid)
@@ -212,7 +212,7 @@ if __name__ == '__main__':
             print('3. Model based Reason(Implicit reason)')
             sub_reason_col_name, _, usedFLG = reason_col_name[2]
             sub_reason_file_name = cityabbr[ind_city] + '_' + sub_reason_col_name + args.apps
-            sub_reason_file = pjoin(datapath_mid,sub_reason_col_name)
+            sub_reason_file = pjoin(datapath_mid,sub_reason_file_name)
 
             if usedFLG:
                 featTranslator = feature_translate()
@@ -235,7 +235,7 @@ if __name__ == '__main__':
             print('4. Is the recommended location similar with its current one?')
             sub_reason_col_name, _, usedFLG = reason_col_name[3]
             sub_reason_file_name = cityabbr[ind_city] + '_' + sub_reason_col_name + args.apps
-            sub_reason_file = pjoin(datapath_mid,sub_reason_col_name)
+            sub_reason_file = pjoin(datapath_mid,sub_reason_file_name)
 
             if usedFLG:
                 cont_col_nameL = feature_column['cont_col_nameL']
@@ -257,7 +257,7 @@ if __name__ == '__main__':
             print('5. Is there a similar company inside the recommended location?')
             sub_reason_col_name, _, usedFLG = reason_col_name[4]
             sub_reason_file_name = cityabbr[ind_city] + '_' + sub_reason_col_name + args.apps
-            sub_reason_file = pjoin(datapath_mid,sub_reason_col_name)
+            sub_reason_file = pjoin(datapath_mid,sub_reason_file_name)
 
             if usedFLG:
                 recall_com5 = sub_rec_similar_company_v2(comp_loc=comp_loc, sspd=sspd, thresh=0.05)
@@ -278,7 +278,7 @@ if __name__ == '__main__':
             print('6. Close to current location')
             sub_reason_col_name, _, usedFLG = reason_col_name[5]
             sub_reason_file_name = cityabbr[ind_city] + '_' + sub_reason_col_name + args.apps
-            sub_reason_file = pjoin(datapath_mid,sub_reason_col_name)
+            sub_reason_file = pjoin(datapath_mid,sub_reason_file_name)
 
             if usedFLG:
                 recall_com6 = sub_rec_location_distance(reason_col_name=sub_reason_col_name)
@@ -296,7 +296,7 @@ if __name__ == '__main__':
             print('7. Inventory bom')
             sub_reason_col_name, _, usedFLG = reason_col_name[6]
             sub_reason_file_name = cityabbr[ind_city] + '_' + sub_reason_col_name + args.apps
-            sub_reason_file = pjoin(datapath_mid,sub_reason_col_name)
+            sub_reason_file = pjoin(datapath_mid,sub_reason_file_name)
 
             if usedFLG:
                 invdb = pd.read_csv(pjoin(datapath, inventory_file))
@@ -315,7 +315,7 @@ if __name__ == '__main__':
             print('8. Compstak')
             sub_reason_col_name,_,usedFLG = reason_col_name[7]
             sub_reason_file_name = cityabbr[ind_city] + '_' + sub_reason_col_name + args.apps
-            sub_reason_file = pjoin(datapath_mid,sub_reason_col_name)
+            sub_reason_file = pjoin(datapath_mid,sub_reason_file_name)
 
             if usedFLG:
                 compstak_db_city = compstak_db.loc[compstak_db['city']==cityname[ind_city],:]
