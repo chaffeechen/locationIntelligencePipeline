@@ -26,3 +26,5 @@ citylongname = ['Palo Alto','San Francisco','San Jose','Los Angeles', 'New York'
 origin_comp_file = ['dnb_pa.csv', 'dnb_sf.csv', 'dnb_sj.csv', 'dnb_Los_Angeles.csv', 'dnb_New_York.csv']
 
 inventory_file = 'inventory_bom.csv'
+compstak_file = 'tetris_mv_tetris_transactions_2016_current.csv'
+compstak_dnb_match_file = 'compstak_dnb.csv'

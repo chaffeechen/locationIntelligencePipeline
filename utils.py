@@ -8,6 +8,7 @@ from enum import Enum
 from math import *
 import tqdm
 import json
+import datetime
 
 pjoin = os.path.join
 
@@ -1016,4 +1017,50 @@ class sub_rec_inventory_bom(object):
                                                                                                   suffixes=sfx)
         clpair = clpair.fillna(0)
         clpair[reason_col] = clpair.apply(lambda x: self.reason if int(x[comp_col]) <= int(x[inv_col]) else '', axis=1)
+        return clpair[[cid, bid, reason_col]]
+
+## CompStak
+def translate_comstak_date(exp_date: str, cur_date, reason):
+    exp_date = exp_date.replace(' ', '')[:10]
+
+    try:
+        exp_date = datetime.datetime.strptime(str(exp_date), "%Y-%m-%d")
+    except:
+        exp_date = '0001-01-01'
+        exp_date = datetime.datetime.strptime(str(exp_date), "%Y-%m-%d")
+
+    diff_date = exp_date - cur_date
+    diff_month = ceil(diff_date.days / 28)
+
+    trans_reason = reason.replace('XXX', str(diff_month))
+
+    if diff_month > 0:
+        return trans_reason
+    else:
+        return ''
+
+class sub_rec_compstak(object):
+    def __init__(self, cpstkdb, cpstkdnb,
+                 reason='Compstack reason: The lease will expire in XXX months.',
+                 bid='altas_location_uuid',
+                 cid='duns_number'):
+        sfx = ['', '_right']
+        cpstkdb = cpstkdb[['tenant_id', 'expiration_date']]
+        cpstkdnb = cpstkdnb[[cid, 'tenant_id']]
+        self.db = cpstkdnb.merge(cpstkdb, on=cid, suffixes=sfx)
+        self.db['expiration_date'] = self.db['expiration_date'].fillna('0001-01-01')
+        self.db = self.db[[cid, 'expiration_date']]
+        self.reason = reason
+        self.cid = cid
+        self.bid = bid
+
+    def get_reason(self, sspd, reason_col='compstak'):
+        bid = self.bid
+        cid = self.cid
+        sfx = ['', '_right']
+        clpair = sspd[[bid, cid]]
+        cur_date = datetime.datetime.now()
+        self.db[reason_col] = self.db['expiration_date'].apply(
+            lambda x: translate_comstak_date(str(x), cur_date, self.reason))
+        clpair = clpair.merge(self.db[[cid, reason_col]], on=cid, suffixes=sfx)
         return clpair[[cid, bid, reason_col]]

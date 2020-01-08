@@ -53,6 +53,9 @@ if __name__ == '__main__':
     loc_feat_file = 'location_feat' + args.apps
     loc_feat_normed = pd.read_csv(pjoin(datapath, loc_feat_file), index_col=0)
 
+    compstak_db = pd.read_csv(pjoin(datapath,compstak_file))[['tenant_id', 'expiration_date','city']]
+    compstak_dnb = pd.read_csv(pjoin(datapath,compstak_dnb_match_file))[['tenant_id',cid,'city']]
+
     comp_feat_col = [c for c in comp_feat_normed.columns if c not in [cid, bid]]
     loc_feat_col = [c for c in loc_feat_normed.columns if c not in [cid, bid]]
 
@@ -79,12 +82,13 @@ if __name__ == '__main__':
     """
     reason_col_name = [
         ('reason_similar_biz', 1,True),  # sub_pairs
-        ('reason_location_based', 6,True),  # sub_loc_recall
-        ('reason_model_based', 7,True),  # dlsubdat
-        ('reason_similar_location', 5,True),
-        ('reason_similar_company', 4,True),
+        ('reason_location_based', 7,True),  # sub_loc_recall
+        ('reason_model_based', 8,True),  # dlsubdat
+        ('reason_similar_location', 6,True),
+        ('reason_similar_company', 5,True),
         ('reason_close_2_current_location', 2,True),
         ('reason_inventory_bom',3,True),
+        ('reason_compstak',4,True),
     ]
 
     if args.tt:
@@ -252,6 +256,23 @@ if __name__ == '__main__':
             else:
                 print('==> Skip')
 
+            print('8. Compstak')
+            sub_reason_col_name,_,usedFLG = reason_col_name[7]
+            if usedFLG:
+                compstak_db_city = compstak_db.loc[compstak_db['city']==cityname[ind_city],:]
+                compstak_dnb_city = compstak_dnb.loc[compstak_dnb['city'] == cityname[ind_city], :]
+                recall_com8 = sub_rec_compstak(cpstkdb=compstak_db_city,cpstkdnb=compstak_dnb_city,
+                                               reason = 'Compstak reason: The lease will expire in XXX months.',
+                                               cid=cid,bid=bid)
+                sub_compstak_db = recall_com8.get_reason(sspd=sspd,reason_col=sub_reason_col_name)
+                reason_db[sub_reason_col_name] = sub_compstak_db
+                print('==> Total pairs generated:%d'%len(sub_compstak_db))
+            else:
+                print('==> Skip')
+
+            """
+            Merge reason for each city
+            """
             sample_sspd = sspd
             print('Merging reasons')
             for col_name,priority,usedFLG in reason_col_name:
