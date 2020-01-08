@@ -997,7 +997,6 @@ class sub_rec_location_distance(object):
         return loc_comp_loc[[bid, cid, self.reason_col_name]]
 
 ## Inventory bom
-
 class sub_rec_inventory_bom(object):
     def __init__(self, invdb, reason='Inventory reason: This available space of this location can hold your company.',bid='atlas_location_uuid',cid='duns_number'):
         self.invdb = invdb.sort_values([bid, 'report_month']) \
@@ -1015,5 +1014,6 @@ class sub_rec_inventory_bom(object):
         comp_feat = comp_feat[[cid,comp_col]]
         clpair = clpair.merge(comp_feat[[cid, comp_col]].fillna(0), on=cid, suffixes=sfx, how='left').merge(self.invdb, on=bid,
                                                                                                   suffixes=sfx)
+        clpair = clpair.fillna(0)
         clpair[reason_col] = clpair.apply(lambda x: self.reason if int(x[comp_col]) <= int(x[inv_col]) else '', axis=1)
         return clpair[[cid, bid, reason_col]]
