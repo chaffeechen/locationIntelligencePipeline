@@ -1032,7 +1032,8 @@ def translate_comstak_date(exp_date: str, cur_date, reason):
     diff_date = exp_date - cur_date
     diff_month = ceil(diff_date.days / 28)
 
-    trans_reason = reason.replace('XXX', str(diff_month))
+    # trans_reason = reason.replace('XXX', str(diff_month))
+    trans_reason = reason%int(diff_month)
 
     if diff_month > 0:
         return trans_reason
@@ -1041,7 +1042,7 @@ def translate_comstak_date(exp_date: str, cur_date, reason):
 
 class sub_rec_compstak(object):
     def __init__(self, cpstkdb, cpstkdnb,
-                 reason='Compstack reason: The lease will expire in XXX months.',
+                 reason='Compstack reason: The lease will expire in %d months.',
                  bid='altas_location_uuid',
                  cid='duns_number'):
         sfx = ['', '_right']

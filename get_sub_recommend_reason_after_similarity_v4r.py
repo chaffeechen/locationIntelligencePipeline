@@ -262,7 +262,7 @@ if __name__ == '__main__':
                 compstak_db_city = compstak_db.loc[compstak_db['city']==cityname[ind_city],:]
                 compstak_dnb_city = compstak_dnb.loc[compstak_dnb['city'] == cityname[ind_city], :]
                 recall_com8 = sub_rec_compstak(cpstkdb=compstak_db_city,cpstkdnb=compstak_dnb_city,
-                                               reason = 'Compstak reason: The lease will expire in XXX months.',
+                                               reason = 'Compstak reason: The lease will expire in %d months.',
                                                cid=cid,bid=bid)
                 sub_compstak_db = recall_com8.get_reason(sspd=sspd,reason_col=sub_reason_col_name)
                 reason_db[sub_reason_col_name] = sub_compstak_db
