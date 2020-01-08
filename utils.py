@@ -1047,7 +1047,7 @@ class sub_rec_compstak(object):
         sfx = ['', '_right']
         cpstkdb = cpstkdb[['tenant_id', 'expiration_date']]
         cpstkdnb = cpstkdnb[[cid, 'tenant_id']]
-        self.db = cpstkdnb.merge(cpstkdb, on=cid, suffixes=sfx)
+        self.db = cpstkdnb.merge(cpstkdb, on='tenant_id', suffixes=sfx)
         self.db['expiration_date'] = self.db['expiration_date'].fillna('0001-01-01')
         self.db = self.db[[cid, 'expiration_date']]
         self.reason = reason
