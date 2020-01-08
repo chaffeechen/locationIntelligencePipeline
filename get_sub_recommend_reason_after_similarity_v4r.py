@@ -100,7 +100,7 @@ if __name__ == '__main__':
     if args.merge:
         print('Skip to merging directly...')
     else:
-        for ind_city in range(5):
+        for ind_city in range(len(cityname)):
             if args.single >= 0 and singlecode != ind_city:
                 continue
             if args.tt and ind_city != testcode:
@@ -171,7 +171,7 @@ if __name__ == '__main__':
                 sub_loc_recall_com4 = recall_com2.exfiltering('num_eating_places', percentile=0.5,
                                                               reason='There are enough restaurants to get food',
                                                               reason_col_name=sub_reason_col_name)
-                print('==> %d, %d, %d will be mergeed' % (
+                print('==> %d, %d, %d will be merged' % (
                     len(sub_loc_recall_com2), len(sub_loc_recall_com3), len(sub_loc_recall_com4)))
 
                 sub_loc_recall = pd.concat([sub_loc_recall_com2, sub_loc_recall_com3, sub_loc_recall_com4], axis=0)

@@ -1020,7 +1020,7 @@ class sub_rec_inventory_bom(object):
         return clpair[[cid, bid, reason_col]]
 
 ## CompStak
-def translate_comstak_date(exp_date: str, cur_date, reason):
+def translate_compstak_date_and_format(exp_date: str, cur_date, reason):
     exp_date = exp_date.replace(' ', '')[:10]
 
     try:
@@ -1039,6 +1039,19 @@ def translate_comstak_date(exp_date: str, cur_date, reason):
         return trans_reason
     else:
         return ''
+
+def translate_compstak_date(exp_date:str,cur_date):
+    exp_date = exp_date.replace(' ', '')[:10]
+    try:
+        exp_date = datetime.datetime.strptime(str(exp_date), "%Y-%m-%d")
+    except:
+        exp_date = '0001-01-01'
+        exp_date = datetime.datetime.strptime(str(exp_date), "%Y-%m-%d")
+
+    diff_date = exp_date - cur_date
+    diff_month = ceil(diff_date.days / 28)
+
+    return diff_month
 
 class sub_rec_compstak(object):
     def __init__(self, cpstkdb, cpstkdnb,
@@ -1061,7 +1074,19 @@ class sub_rec_compstak(object):
         sfx = ['', '_right']
         clpair = sspd[[bid, cid]]
         cur_date = datetime.datetime.now()
-        self.db[reason_col] = self.db['expiration_date'].apply(
-            lambda x: translate_comstak_date(str(x), cur_date, self.reason))
+        self.db['month_remain'] = self.db['expiration_date'].apply(
+            lambda x: translate_compstak_date(str(x), cur_date)
+        )
+
+        self.db['month_remain'] = self.db['month_remain'].astype(int)
+
+        self.db = self.db.sort_values([cid, 'month_remain']) \
+            .drop_duplicates([cid], keep='last')
+
+        self.db[reason_col] = self.db['month_remain'].apply(
+            lambda x: self.reason%int(x) if x > 0 else ''
+        )
+
+
         clpair = clpair.merge(self.db[[cid, reason_col]], on=cid, suffixes=sfx)
         return clpair[[cid, bid, reason_col]]
