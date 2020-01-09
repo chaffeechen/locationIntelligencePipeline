@@ -27,6 +27,7 @@ if __name__ == '__main__':
     arg('--run_root', default='/Users/yefeichen/Database/location_recommender_system/')
     arg('--ls_card', default='location_scorecard_200106.csv')
     arg('--apps', type=str, default='_200106.csv')
+    arg('--otversion', type=str, default='_200106.csv', help='output file\'s version')
     arg('--single',type=int,default=-1)
     arg('--merge', action='store_true', help='doing merge only')
     arg('--nomerge',action='store_true',help='dont merge')
@@ -44,7 +45,10 @@ if __name__ == '__main__':
         print('Only %s will be generated'%citylongname[singlecode])
 
     datapath = args.run_root
-    datapath_mid = pjoin(datapath,'reason_table')
+    if args.tt:
+        datapath_mid = pjoin(datapath, 'tmp_table')
+    else:
+        datapath_mid = pjoin(datapath,'reason_table')
     cfile = origin_comp_file
     lfile = args.ls_card
     clfile = [c + args.apps for c in cityabbr]
@@ -73,6 +77,7 @@ if __name__ == '__main__':
 
     ssfile = [sam + ww + c.replace(args.apps, '') + '_similarity' + args.apps for c in
               clfile]  # e.g. ['ww_PA_similarity_20191113.csv']
+    rsfile = ['z_reason_' + c + '_similarity' + args.otversion for c in cityabbr]
     dlsub_ssfile = ['dlsub_' + c for c in ssfile]
 
     wework_location_only = args.ww
@@ -143,7 +148,7 @@ if __name__ == '__main__':
             # Reason 1:
             print('1. Is there a company with similar biz inside the location?')
             sub_reason_col_name,_,usedFLG = reason_col_name[0]
-            sub_reason_file_name = cityabbr[ind_city] + '_' + sub_reason_col_name + args.apps
+            sub_reason_file_name = cityabbr[ind_city] + '_' + sub_reason_col_name + args.otversion
             sub_reason_file = pjoin(datapath_mid,sub_reason_file_name)
 
             if usedFLG:
@@ -170,7 +175,7 @@ if __name__ == '__main__':
             # Reason2:
             print('2. How is region?(Location based reason)')
             sub_reason_col_name, _, usedFLG = reason_col_name[1]
-            sub_reason_file_name = cityabbr[ind_city] + '_' + sub_reason_col_name + args.apps
+            sub_reason_file_name = cityabbr[ind_city] + '_' + sub_reason_col_name + args.otversion
             sub_reason_file = pjoin(datapath_mid,sub_reason_file_name)
 
             if usedFLG:
@@ -212,7 +217,7 @@ if __name__ == '__main__':
             # Reason3: Tag!!!!
             print('3. Model based Reason(Implicit reason)')
             sub_reason_col_name, _, usedFLG = reason_col_name[2]
-            sub_reason_file_name = cityabbr[ind_city] + '_' + sub_reason_col_name + args.apps
+            sub_reason_file_name = cityabbr[ind_city] + '_' + sub_reason_col_name + args.otversion
             sub_reason_file = pjoin(datapath_mid,sub_reason_file_name)
 
             if usedFLG:
@@ -235,7 +240,7 @@ if __name__ == '__main__':
 
             print('4. Is the recommended location similar with its current one?')
             sub_reason_col_name, _, usedFLG = reason_col_name[3]
-            sub_reason_file_name = cityabbr[ind_city] + '_' + sub_reason_col_name + args.apps
+            sub_reason_file_name = cityabbr[ind_city] + '_' + sub_reason_col_name + args.otversion
             sub_reason_file = pjoin(datapath_mid,sub_reason_file_name)
 
             if usedFLG:
@@ -257,7 +262,7 @@ if __name__ == '__main__':
 
             print('5. Is there a similar company inside the recommended location?')
             sub_reason_col_name, _, usedFLG = reason_col_name[4]
-            sub_reason_file_name = cityabbr[ind_city] + '_' + sub_reason_col_name + args.apps
+            sub_reason_file_name = cityabbr[ind_city] + '_' + sub_reason_col_name + args.otversion
             sub_reason_file = pjoin(datapath_mid,sub_reason_file_name)
 
             if usedFLG:
@@ -290,7 +295,7 @@ if __name__ == '__main__':
 
             print('6. Close to current location')
             sub_reason_col_name, _, usedFLG = reason_col_name[5]
-            sub_reason_file_name = cityabbr[ind_city] + '_' + sub_reason_col_name + args.apps
+            sub_reason_file_name = cityabbr[ind_city] + '_' + sub_reason_col_name + args.otversion
             sub_reason_file = pjoin(datapath_mid,sub_reason_file_name)
 
             if usedFLG:
@@ -308,7 +313,7 @@ if __name__ == '__main__':
 
             print('7. Inventory bom')
             sub_reason_col_name, _, usedFLG = reason_col_name[6]
-            sub_reason_file_name = cityabbr[ind_city] + '_' + sub_reason_col_name + args.apps
+            sub_reason_file_name = cityabbr[ind_city] + '_' + sub_reason_col_name + args.otversion
             sub_reason_file = pjoin(datapath_mid,sub_reason_file_name)
 
             if usedFLG:
@@ -327,7 +332,7 @@ if __name__ == '__main__':
 
             print('8. Compstak')
             sub_reason_col_name,_,usedFLG = reason_col_name[7]
-            sub_reason_file_name = cityabbr[ind_city] + '_' + sub_reason_col_name + args.apps
+            sub_reason_file_name = cityabbr[ind_city] + '_' + sub_reason_col_name + args.otversion
             sub_reason_file = pjoin(datapath_mid,sub_reason_file_name)
 
             if usedFLG:
@@ -379,18 +384,18 @@ if __name__ == '__main__':
 
             print(len(sample_sspd))
 
-            sample_sspd.to_csv(pjoin(datapath_mid,'sub_' + ssfile[ind_city]))
+            sample_sspd.to_csv(pjoin(datapath_mid,rsfile[ind_city]))
 
 ##merging files
 
 if not args.nomerge:
     print('merging results')
     if args.tt:
-        dfs = pd.read_csv(pjoin(datapath_mid,'sub_' + ssfile[testcode]), index_col=0)
+        dfs = pd.read_csv(pjoin(datapath_mid,rsfile[testcode]), index_col=0)
     else:
         dfs = []
-        for filename in ssfile:
-            dfs.append(pd.read_csv(pjoin(datapath_mid,'sub_' + filename), index_col=0))
+        for filename in rsfile:
+            dfs.append(pd.read_csv(pjoin(datapath_mid,filename), index_col=0))
         dfs = pd.concat(dfs, axis=0).reset_index(drop=True)
 
     loc_df = dfs.groupby(bid, sort=True)[[bid]].first().reset_index(drop=True)

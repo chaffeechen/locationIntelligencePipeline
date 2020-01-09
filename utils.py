@@ -380,11 +380,14 @@ class sub_rec_similar_company(object):
         sub_pairs[self.reason_col_name] = reason
         return sub_pairs
 
-    def get_candidate_location_for_company_fast(self, query_comp_loc, reason='similar company(%s) inside'):
+    def get_candidate_location_for_company_fast(self, query_comp_loc, reason='similar company(%s) inside', jsFLG=False , jsKey='A'):
         sub_pairs = pd.merge(query_comp_loc[[self.cid, self.bid, self.matching_col]], self.loc_type,
                              on=[self.bid, self.matching_col], suffixes=['', '_right'])
         sub_pairs = sub_pairs.dropna()
-        sub_pairs[self.reason_col_name] = sub_pairs[self.cname].apply(lambda x: reason%str(x) )
+        if jsFLG:
+            sub_pairs[self.reason_col_name] = sub_pairs[self.cname].apply(lambda x: json.dumps({jsKey:[(reason % str(x))]}))
+        else:
+            sub_pairs[self.reason_col_name] = sub_pairs[self.cname].apply(lambda x: reason % str(x))
         return sub_pairs
 
 
@@ -758,6 +761,41 @@ class feature_translate(object):
             return 'Implicit reason: ' + final_phs + '.'
         else:
             return ''
+
+    def make_sense_json(self, input_lst, jsKey='A'):
+        last_delimeter = '.'
+        if isinstance(input_lst, list):
+            pass
+        elif isinstance(input_lst, str):
+            input_lst = input_lst.replace('[', '', 1)
+            input_lst = input_lst.replace(']', '', 1)
+            input_lst = [e for e in input_lst.split(',') if e]
+        else:
+            return 'Err:input type'
+
+        comp_lst, loc_lst, region_lst = [], [], []
+
+        key_lst = []
+        for key in input_lst:
+            ret = self.getItem(key)
+
+            if ret['status']:
+                if ret['key'] not in key_lst:  # get rid of the duplicate feature
+                    key_lst.append(ret['key'])
+                    phss = ret['item']
+                    if phss[0] == featsrc.company:
+                        comp_lst.append(phss[1])
+                    elif phss[0] == featsrc.location:
+                        loc_lst.append(phss[1])
+                    elif phss[0] == featsrc.region:
+                        region_lst.append(phss[1])
+
+        comp_phs = [phs+last_delimeter for phs in comp_lst if phs]
+        loc_phs = [ 'This location has ' + phs + last_delimeter for phs in loc_lst if phs]
+        region_phs = [ phs + ' inside the region' + last_delimeter for phs in region_lst if phs]
+
+        final_js = {jsKey: (comp_phs+loc_phs+region_phs) }
+        return final_js
 
 
 # =======================================================================================================================
