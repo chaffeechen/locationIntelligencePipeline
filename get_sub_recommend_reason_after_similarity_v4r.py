@@ -33,10 +33,11 @@ if __name__ == '__main__':
     arg('--sampled', action='store_true', help='is similarity score sampled?')
     arg('--ww', action='store_true', help='is ww building only?')
     arg('--tt', action='store_true', help='doing test for 1 city only')
+    arg('--ttcode',type=int,default=2)
 
 
     args = parser.parse_args()
-    testcode = 2  # in --tt mode, which city is used for test
+    testcode = args.ttcode  # in --tt mode, which city is used for test
     if args.single >= 0:
         singlecode = min(len(citylongname),args.single)
         print('#####Attention#####')
