@@ -345,18 +345,18 @@ def apply_dummy(coldict: dict, data):
 # get_sub_recommend_reason_after_similarity
 # =======================================================================================================================
 # =======================================================================================================================
-def generate_loc_type(comp_feat, comp_loc, matching_col,cid='duns_number',bid='atlas_location_uuid'):
+def generate_loc_type(comp_feat, comp_loc, matching_col,cid='duns_number',bid='atlas_location_uuid',cname='business_name'):
     # matching_col = 'major_industry_category'
-    comp_type = comp_feat[[cid, matching_col]].dropna()
+    comp_type = comp_feat[[cid, matching_col,cname]].dropna()
     comp_type_location = pd.merge(comp_type, comp_loc[[cid, bid]], on=cid)
 
     loc_type = comp_type_location.groupby([bid, matching_col]).first().reset_index()[
-        [bid, matching_col]]
+        [bid, matching_col,cname]]
     return loc_type
 
 
 class sub_rec_similar_company(object):
-    def __init__(self, comp_feat, comp_loc, matching_col, reason_col_name='reason',bid='atlas_location_uuid',cid='duns_number'):
+    def __init__(self, comp_feat, comp_loc, matching_col, reason_col_name='reason',bid='atlas_location_uuid',cid='duns_number',cname = 'business_name'):
         """
         comp_feat: original company information
         comp_loc: company-location affinities of a certain city
@@ -367,9 +367,10 @@ class sub_rec_similar_company(object):
         self.comp_loc = comp_loc
         self.matching_col = matching_col
         self.reason_col_name = reason_col_name
-        self.loc_type = generate_loc_type(comp_feat, comp_loc, matching_col,cid=cid,bid=bid)
+        self.loc_type = generate_loc_type(comp_feat, comp_loc, matching_col,cid=cid,bid=bid,cname=cname)
         self.bid = bid
         self.cid = cid
+        self.cname = cname
 
     def get_candidate_location_for_company(self, query_comp_feat, reason='similar company inside'):
         sub_pairs = pd.merge(query_comp_feat[[self.cid, self.matching_col]], self.loc_type, on=self.matching_col,
@@ -379,10 +380,11 @@ class sub_rec_similar_company(object):
         sub_pairs[self.reason_col_name] = reason
         return sub_pairs
 
-    def get_candidate_location_for_company_fast(self, query_comp_loc, reason='similar company inside'):
+    def get_candidate_location_for_company_fast(self, query_comp_loc, reason='similar company(%s) inside'):
         sub_pairs = pd.merge(query_comp_loc[[self.cid, self.bid, self.matching_col]], self.loc_type,
                              on=[self.bid, self.matching_col], suffixes=['', '_right'])
-        sub_pairs[self.reason_col_name] = reason
+        sub_pairs = sub_pairs.dropna()
+        sub_pairs[self.reason_col_name] = sub_pairs[self.cname].apply(lambda x: reason%str(x) )
         return sub_pairs
 
 

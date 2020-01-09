@@ -153,10 +153,8 @@ if __name__ == '__main__':
                                                       matching_col=matching_col, reason_col_name=sub_reason_col_name,
                                                       bid=bid, cid=cid)
 
-                sub_pairs = recall_com1.get_candidate_location_for_company_fast(query_comp_loc=query_comp_loc, reason='like')
+                sub_pairs = recall_com1.get_candidate_location_for_company_fast(query_comp_loc=query_comp_loc, reason='This location has a tenant company(%s) which is in the same industry as your company.')
                 # explanar
-                sub_pairs[
-                    sub_reason_col_name] = 'This location has a tenant company which is in the same industry as your company.'
                 reason_db[sub_reason_col_name] = sub_pairs
                 print('==> Coverage: %1.2f' % (len(reason_db[sub_reason_col_name])/total_pairs_num) )
                 reason_db[sub_reason_col_name].to_csv(sub_reason_file)
