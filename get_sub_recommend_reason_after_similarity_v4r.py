@@ -130,6 +130,7 @@ if __name__ == '__main__':
                 sub_loc_feat_ww = sub_loc_feat.loc[sub_loc_feat['is_wework'] == True, :]
                 sub_comp_loc = pd.merge(comp_loc, sub_loc_feat_ww[[bid]], on=bid,
                                         suffixes=sfx)  # multi comp loc
+                print('==> %d locations inside the city'%len(sub_loc_feat_ww))
             else:
                 sub_comp_loc = pd.merge(comp_loc, sub_loc_feat[[bid]], on=bid,
                                         suffixes=sfx)  # multi comp loc
@@ -187,11 +188,11 @@ if __name__ == '__main__':
                     len(sub_loc_recall_com2), len(sub_loc_recall_com3), len(sub_loc_recall_com4)))
 
                 sub_loc_recall = pd.concat([sub_loc_recall_com2, sub_loc_recall_com3, sub_loc_recall_com4], axis=0)
-                print('==>%d'%len(sub_loc_recall))
+                # print('==>%d'%len(sub_loc_recall))
                 if wework_location_only:
                     sub_loc_recall = sub_loc_recall.merge(sub_loc_feat_ww[[bid]], on=bid,
                                                           suffixes=sfx)
-                    print('==>%d' % len(sub_loc_recall))
+                    # print('==>%d' % len(sub_loc_recall))
                 # explanar:merge_rec_reason_rowise 需要在结尾加"."
                 sub_loc_recall = merge_rec_reason_rowise(sub_loc_recall, group_cols=[bid],
                                                          merge_col=sub_reason_col_name, sep='. ')
@@ -199,7 +200,7 @@ if __name__ == '__main__':
                     sub_reason_col_name] + '. '
 
                 reason_db[sub_reason_col_name] = sub_loc_recall
-                print('==> Coverage: %1.2f' % (len(reason_db[sub_reason_col_name]) / total_pairs_num))
+                print('==> Coverage: %1.2f' % (len(reason_db[sub_reason_col_name])/len(sub_loc_feat_ww) ))
                 reason_db[sub_reason_col_name].to_csv(sub_reason_file)
             else:
                 if os.path.isfile( sub_reason_file ):
