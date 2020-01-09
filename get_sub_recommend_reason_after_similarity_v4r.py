@@ -259,7 +259,16 @@ if __name__ == '__main__':
             sub_reason_file = pjoin(datapath_mid,sub_reason_file_name)
 
             if usedFLG:
-                sub_sspd = sspd.merge(sub_pairs[[cid,bid]],on=[cid,bid],suffixes=sfx)
+                matching_col = 'primary_sic_6_digit'
+                query_comp_loc = sspd[[bid, cid]]
+                query_comp_loc = query_comp_loc.merge(comp_feat[[cid, matching_col]], on=cid, suffixes=sfx)
+
+                recall_com5_ext = sub_rec_similar_company(comp_feat=comp_feat, comp_loc=sub_comp_loc,
+                                                      matching_col=matching_col, reason_col_name=sub_reason_col_name,
+                                                      bid=bid, cid=cid)
+                sub_sspd = recall_com5_ext.get_candidate_location_for_company_fast(query_comp_loc=query_comp_loc, reason='This location has a tenant company(%s) which is in the same industry as your company.')
+                # explanar
+                sub_sspd = sspd.merge(sub_sspd[[cid,bid]],on=[cid,bid],suffixes=sfx)
                 print('Shrinkage ratio: %1.2f' % (len(sub_sspd)/len(sspd)) )
                 recall_com5 = sub_rec_similar_company_v2(comp_loc=comp_loc, sspd=sub_sspd, thresh=0.05)
                 sim_comp_name = recall_com5.get_reason_batch(comp_feat=comp_feat, comp_feat_col=comp_feat_col,
