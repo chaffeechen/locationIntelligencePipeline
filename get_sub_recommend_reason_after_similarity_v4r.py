@@ -260,13 +260,16 @@ if __name__ == '__main__':
             sub_reason_file = pjoin(datapath_mid,sub_reason_file_name)
 
             if usedFLG:
-                recall_com5 = sub_rec_similar_company_v2(comp_loc=comp_loc, sspd=sspd, thresh=0.05)
+                sub_sspd = sspd.merge(sub_pairs[[cid,bid]],on=[cid,bid],suffixes=sfx)
+                print('Shrinkage ratio: %1.2f' % (len(sub_sspd)/len(sspd)) )
+                recall_com5 = sub_rec_similar_company_v2(comp_loc=comp_loc, sspd=sub_sspd, thresh=0.05)
                 sim_comp_name = recall_com5.get_reason_batch(comp_feat=comp_feat, comp_feat_col=comp_feat_col,
                                                              comp_feat_normed=comp_feat_normed,
                                                              reason_col_name=sub_reason_col_name, batch_size=5000)
                 reason_db[sub_reason_col_name] = sim_comp_name
                 print('==> Coverage: %1.2f' % (len(reason_db[sub_reason_col_name]) / total_pairs_num))
                 reason_db[sub_reason_col_name].to_csv(sub_reason_file)
+                del sub_sspd
             else:
                 if os.path.isfile(sub_reason_file):
                     reason_db[sub_reason_col_name] = pd.read_csv(sub_reason_file, index_col=0)
