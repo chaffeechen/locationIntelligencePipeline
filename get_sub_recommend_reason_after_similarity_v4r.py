@@ -152,7 +152,7 @@ if __name__ == '__main__':
 
                 recall_com1 = sub_rec_similar_company(comp_feat=comp_feat, comp_loc=sub_comp_loc,
                                                       matching_col=matching_col, reason_col_name=sub_reason_col_name,
-                                                      bid=bid, cid=cid)
+                                                      bid=bid, cid=cid,cname='business_name')
 
                 sub_pairs = recall_com1.get_candidate_location_for_company_fast(query_comp_loc=query_comp_loc, reason='This location has a tenant company(%s) which is in the same industry as your company.')
                 # explanar
@@ -265,7 +265,7 @@ if __name__ == '__main__':
 
                 recall_com5_ext = sub_rec_similar_company(comp_feat=comp_feat, comp_loc=sub_comp_loc,
                                                       matching_col=matching_col, reason_col_name=sub_reason_col_name,
-                                                      bid=bid, cid=cid)
+                                                      bid=bid, cid=cid,cname='business_name')
                 sub_sspd = recall_com5_ext.get_candidate_location_for_company_fast(query_comp_loc=query_comp_loc, reason='This location has a tenant company(%s) which is in the same industry as your company.')
                 # explanar
                 sub_sspd = sspd.merge(sub_sspd[[cid,bid]],on=[cid,bid],suffixes=sfx)
