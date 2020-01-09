@@ -347,7 +347,7 @@ def apply_dummy(coldict: dict, data):
 # =======================================================================================================================
 def generate_loc_type(comp_feat, comp_loc, matching_col,cid='duns_number',bid='atlas_location_uuid'):
     # matching_col = 'major_industry_category'
-    comp_type = comp_feat[[cid, matching_col]]
+    comp_type = comp_feat[[cid, matching_col]].dropna()
     comp_type_location = pd.merge(comp_type, comp_loc[[cid, bid]], on=cid)
 
     loc_type = comp_type_location.groupby([bid, matching_col]).first().reset_index()[

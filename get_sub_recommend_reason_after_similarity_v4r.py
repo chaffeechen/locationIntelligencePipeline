@@ -145,7 +145,7 @@ if __name__ == '__main__':
             sub_reason_file = pjoin(datapath_mid,sub_reason_file_name)
 
             if usedFLG:
-                matching_col = 'primary_sic_2_digit_v2'  # matching_col = 'major_industry_category'
+                matching_col = 'primary_sic_4_digit' #'primary_sic_2_digit_v2','major_industry_category'
                 query_comp_loc = sspd[[bid, cid]]
                 query_comp_loc = query_comp_loc.merge(comp_feat[[cid, matching_col]], on=cid, suffixes=sfx)
 
