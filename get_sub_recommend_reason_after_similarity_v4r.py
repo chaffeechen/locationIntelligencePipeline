@@ -90,8 +90,8 @@ if __name__ == '__main__':
     reason_col_name = [
         ('reason_similar_biz', 1,True),  # sub_pairs
         ('reason_location_based', 7,True),  # sub_loc_recall
-        ('reason_model_based', 8,False),  # dlsubdat
-        ('reason_similar_location', 6,False),
+        ('reason_model_based', 8,True),  # dlsubdat
+        ('reason_similar_location', 6,True),
         ('reason_similar_company', 5,True),
         ('reason_close_2_current_location', 2,True),
         ('reason_inventory_bom',3,True),
@@ -164,6 +164,8 @@ if __name__ == '__main__':
                 # explanar
                 reason_db[sub_reason_col_name] = sub_pairs
                 print('==> Coverage: %1.2f' % (len(reason_db[sub_reason_col_name])/total_pairs_num) )
+                reason_db[sub_reason_col_name][sub_reason_col_name] = reason_db[sub_reason_col_name][
+                    sub_reason_col_name].astype(str)
                 reason_db[sub_reason_col_name].to_csv(sub_reason_file)
             else:
                 if os.path.isfile( sub_reason_file ):
@@ -207,6 +209,8 @@ if __name__ == '__main__':
 
                 reason_db[sub_reason_col_name] = sub_loc_recall
                 print('==> Coverage: %1.2f' % (len(reason_db[sub_reason_col_name])/len(sub_loc_feat_ww) ))
+                reason_db[sub_reason_col_name][sub_reason_col_name] = reason_db[sub_reason_col_name][
+                    sub_reason_col_name].astype(str)
                 reason_db[sub_reason_col_name].to_csv(sub_reason_file)
             else:
                 if os.path.isfile( sub_reason_file ):
@@ -231,6 +235,8 @@ if __name__ == '__main__':
 
                 reason_db[sub_reason_col_name] = dlsubdat
                 print('==> Coverage: %1.2f' % (len(reason_db[sub_reason_col_name]) / total_pairs_num))
+                reason_db[sub_reason_col_name][sub_reason_col_name] = reason_db[sub_reason_col_name][
+                    sub_reason_col_name].astype(str)
                 reason_db[sub_reason_col_name].to_csv(sub_reason_file)
             else:
                 if os.path.isfile(sub_reason_file):
@@ -255,6 +261,7 @@ if __name__ == '__main__':
                                                       reason='Location similar in: ', multi_flag=True)
                 reason_db[sub_reason_col_name] = loc_comp_loc
                 print('==> Coverage: %1.2f' % (len(reason_db[sub_reason_col_name]) / total_pairs_num))
+                reason_db[sub_reason_col_name][sub_reason_col_name] = reason_db[sub_reason_col_name][sub_reason_col_name].astype(str)
                 reason_db[sub_reason_col_name].to_csv(sub_reason_file)
             else:
                 if os.path.isfile(sub_reason_file):
@@ -287,6 +294,8 @@ if __name__ == '__main__':
                                                              reason_col_name=sub_reason_col_name, batch_size=5000)
                 reason_db[sub_reason_col_name] = sim_comp_name
                 print('==> Coverage: %1.2f' % (len(reason_db[sub_reason_col_name]) / total_pairs_num))
+                reason_db[sub_reason_col_name][sub_reason_col_name] = reason_db[sub_reason_col_name][
+                    sub_reason_col_name].astype(str)
                 reason_db[sub_reason_col_name].to_csv(sub_reason_file)
                 del sub_sspd
             else:
@@ -308,6 +317,8 @@ if __name__ == '__main__':
                 sub_close_loc = recall_com6.get_reason(sspd=sspd, loc_feat=loc_feat, comp_feat=comp_feat, dist_thresh=3.2e3)
                 reason_db[sub_reason_col_name] = sub_close_loc
                 print('==> Coverage: %1.2f' % (len(reason_db[sub_reason_col_name]) / total_pairs_num))
+                reason_db[sub_reason_col_name][sub_reason_col_name] = reason_db[sub_reason_col_name][
+                    sub_reason_col_name].astype(str)
                 reason_db[sub_reason_col_name].to_csv(sub_reason_file)
             else:
                 if os.path.isfile(sub_reason_file):
@@ -328,6 +339,8 @@ if __name__ == '__main__':
                 sub_inventory_db = recall_com7.get_reason(sspd=sspd,comp_feat=comp_feat,comp_col='emp_here',inv_col='max_reservable_capacity',reason_col=sub_reason_col_name)
                 reason_db[sub_reason_col_name] = sub_inventory_db
                 print('==> Coverage: %1.2f' % (len(reason_db[sub_reason_col_name]) / total_pairs_num))
+                reason_db[sub_reason_col_name][sub_reason_col_name] = reason_db[sub_reason_col_name][
+                    sub_reason_col_name].astype(str)
                 reason_db[sub_reason_col_name].to_csv(sub_reason_file)
             else:
                 if os.path.isfile(sub_reason_file):
@@ -351,6 +364,8 @@ if __name__ == '__main__':
                 sub_compstak_db = recall_com8.get_reason(sspd=sspd,reason_col=sub_reason_col_name)
                 reason_db[sub_reason_col_name] = sub_compstak_db
                 print('==> Coverage: %1.2f' % (len(reason_db[sub_reason_col_name]) / total_pairs_num))
+                reason_db[sub_reason_col_name][sub_reason_col_name] = reason_db[sub_reason_col_name][
+                    sub_reason_col_name].astype(str)
                 reason_db[sub_reason_col_name].to_csv(sub_reason_file)
             else:
                 if os.path.isfile(sub_reason_file):
