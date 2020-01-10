@@ -413,9 +413,9 @@ if not args.nomerge:
     dfs = dfs[col_list]
 
     if args.tt:
-        dfs.to_csv('sub_all_similarity_multi_test.csv', index=False)
+        dfs.to_csv('sub_all_similarity_multi_test'+args.otversion, index=False)
     else:
-        dfs.to_csv('sub_all_similarity_multi.csv', index=False)
+        dfs.to_csv('sub_all_similarity_multi'+args.otversion, index=False)
 
     print('Done!')
 else:
