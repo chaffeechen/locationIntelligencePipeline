@@ -90,9 +90,9 @@ if __name__ == '__main__':
     reason_col_name = [
         ('reason_similar_biz', 1,True),  # sub_pairs
         ('reason_location_based', 7,True),  # sub_loc_recall
-        ('reason_model_based', 8,True),  # dlsubdat
-        ('reason_similar_location', 6,True),
-        ('reason_similar_company', 5,False),
+        ('reason_model_based', 8,False),  # dlsubdat
+        ('reason_similar_location', 6,False),
+        ('reason_similar_company', 5,True),
         ('reason_close_2_current_location', 2,True),
         ('reason_inventory_bom',3,True),
         ('reason_compstak',4,True),
