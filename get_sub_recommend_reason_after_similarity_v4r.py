@@ -170,6 +170,8 @@ if __name__ == '__main__':
             else:
                 if os.path.isfile( sub_reason_file ):
                     reason_db[sub_reason_col_name] = pd.read_csv(sub_reason_file,index_col=0)
+                    reason_db[sub_reason_col_name][sub_reason_col_name] = reason_db[sub_reason_col_name][
+                        sub_reason_col_name].astype(str)
                     print(reason_db[sub_reason_col_name].columns)
                     print('==> Load existing result with coverage: %1.2f' % (len(reason_db[sub_reason_col_name])/total_pairs_num) )
                 else:
@@ -215,6 +217,8 @@ if __name__ == '__main__':
             else:
                 if os.path.isfile( sub_reason_file ):
                     reason_db[sub_reason_col_name] = pd.read_csv(sub_reason_file,index_col=0)
+                    reason_db[sub_reason_col_name][sub_reason_col_name] = reason_db[sub_reason_col_name][
+                        sub_reason_col_name].astype(str)
                     print(reason_db[sub_reason_col_name].columns)
                     print('==> Load existing result with coverage: %1.2f' % (len(reason_db[sub_reason_col_name]) / total_pairs_num))
                 else:
@@ -241,6 +245,8 @@ if __name__ == '__main__':
             else:
                 if os.path.isfile(sub_reason_file):
                     reason_db[sub_reason_col_name] = pd.read_csv(sub_reason_file, index_col=0)
+                    reason_db[sub_reason_col_name][sub_reason_col_name] = reason_db[sub_reason_col_name][
+                        sub_reason_col_name].astype(str)
                     print(reason_db[sub_reason_col_name].columns)
                     print('==> Load existing result with coverage: %1.2f' % (len(reason_db[sub_reason_col_name]) / total_pairs_num))
                 else:
@@ -266,6 +272,8 @@ if __name__ == '__main__':
             else:
                 if os.path.isfile(sub_reason_file):
                     reason_db[sub_reason_col_name] = pd.read_csv(sub_reason_file, index_col=0)
+                    reason_db[sub_reason_col_name][sub_reason_col_name] = reason_db[sub_reason_col_name][
+                        sub_reason_col_name].astype(str)
                     print(reason_db[sub_reason_col_name].columns)
                     print('==> Load existing result with coverage: %1.2f' % (len(reason_db[sub_reason_col_name]) / total_pairs_num))
                 else:
@@ -301,6 +309,8 @@ if __name__ == '__main__':
             else:
                 if os.path.isfile(sub_reason_file):
                     reason_db[sub_reason_col_name] = pd.read_csv(sub_reason_file, index_col=0)
+                    reason_db[sub_reason_col_name][sub_reason_col_name] = reason_db[sub_reason_col_name][
+                        sub_reason_col_name].astype(str)
                     print(reason_db[sub_reason_col_name].columns)
                     print('==> Load existing result with coverage: %1.2f' % (
                     len(reason_db[sub_reason_col_name]) / total_pairs_num))
@@ -323,6 +333,8 @@ if __name__ == '__main__':
             else:
                 if os.path.isfile(sub_reason_file):
                     reason_db[sub_reason_col_name] = pd.read_csv(sub_reason_file, index_col=0)
+                    reason_db[sub_reason_col_name][sub_reason_col_name] = reason_db[sub_reason_col_name][
+                        sub_reason_col_name].astype(str)
                     print(reason_db[sub_reason_col_name].columns)
                     print('==> Load existing result with coverage: %1.2f' % (len(reason_db[sub_reason_col_name]) / total_pairs_num))
                 else:
@@ -345,6 +357,8 @@ if __name__ == '__main__':
             else:
                 if os.path.isfile(sub_reason_file):
                     reason_db[sub_reason_col_name] = pd.read_csv(sub_reason_file, index_col=0)
+                    reason_db[sub_reason_col_name][sub_reason_col_name] = reason_db[sub_reason_col_name][
+                        sub_reason_col_name].astype(str)
                     print(reason_db[sub_reason_col_name].columns)
                     print('==> Load existing result with coverage: %1.2f' % (len(reason_db[sub_reason_col_name]) / total_pairs_num))
                 else:
@@ -370,6 +384,8 @@ if __name__ == '__main__':
             else:
                 if os.path.isfile(sub_reason_file):
                     reason_db[sub_reason_col_name] = pd.read_csv(sub_reason_file, index_col=0)
+                    reason_db[sub_reason_col_name][sub_reason_col_name] = reason_db[sub_reason_col_name][
+                        sub_reason_col_name].astype(str)
                     print(reason_db[sub_reason_col_name].columns)
                     print('==> Load existing result with coverage: %1.2f' % (len(reason_db[sub_reason_col_name]) / total_pairs_num))
                 else:
