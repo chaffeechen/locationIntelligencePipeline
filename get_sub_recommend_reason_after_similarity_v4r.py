@@ -92,7 +92,7 @@ if __name__ == '__main__':
         ('reason_location_based', 7,True),  # sub_loc_recall
         ('reason_model_based', 8,True),  # dlsubdat
         ('reason_similar_location', 6,True),
-        ('reason_similar_company', 5,True),
+        ('reason_similar_company', 5,False),
         ('reason_close_2_current_location', 2,True),
         ('reason_inventory_bom',3,True),
         ('reason_compstak',4,True),
