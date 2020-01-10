@@ -90,8 +90,8 @@ if __name__ == '__main__':
     reason_col_name = [
         ('reason_similar_biz', 1,True),  # sub_pairs
         ('reason_location_based', 7,True),  # sub_loc_recall
-        ('reason_model_based', 8,True),  # dlsubdat
-        ('reason_similar_location', 6,True),
+        ('reason_model_based', 8,False),  # dlsubdat
+        ('reason_similar_location', 6,False),
         ('reason_similar_company', 5,False),
         ('reason_close_2_current_location', 2,True),
         ('reason_inventory_bom',3,True),
@@ -397,9 +397,9 @@ if __name__ == '__main__':
             sample_sspd = sspd
             print('Merging reasons')
             for col_name,priority,usedFLG in reason_col_name:
-                if usedFLG:
-                    match_key = list(set([bid,cid]) & set(reason_db[col_name].columns)) #sometimes only location uuid is given
-                    sample_sspd = sample_sspd.merge(reason_db[col_name], on=match_key, how='left', suffixes=sfx)
+                # if usedFLG: This is a big bug
+                match_key = list(set([bid,cid]) & set(reason_db[col_name].columns)) #sometimes only location uuid is given
+                sample_sspd = sample_sspd.merge(reason_db[col_name], on=match_key, how='left', suffixes=sfx)
 
             sample_sspd = sample_sspd.fillna('')
             print('Json format transforming...')
