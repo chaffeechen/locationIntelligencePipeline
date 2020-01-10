@@ -368,8 +368,7 @@ if __name__ == '__main__':
             sorted_reason_col_name = [c[0] for c in sorted_reason_col_name]
             sample_sspd['reason'] = sample_sspd.apply(
                 lambda x: merge_str_2_json_rowise_reformat(row=x, src_cols=sorted_reason_col_name, jsKey='reasons',
-                                                           target_phss=['Location similar in: ', 'Implicit reason: ']),
-                axis=1)
+                                                           target_phss=['Location similar in: ', 'Implicit reason: ']), axis=1)
 
             sample_sspd[cid] = sample_sspd[cid].astype(int)
             sample_sspd = sample_sspd.rename(columns={
