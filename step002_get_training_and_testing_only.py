@@ -47,11 +47,11 @@ if __name__ == '__main__':
 
     train_test_val_pairs = []
 
-    pdlls = []  # all location feat pd list
-    pdccs = []
+    # pdlls = []  # all location feat pd list
+    # pdccs = []
     for ind_city in range(len(clfile)):
-        pdc = pd.read_csv(pjoin(datapath, cfile[ind_city]))
-        pdl = pd.read_csv(pjoin(datapath, lfile))
+        # pdc = pd.read_csv(pjoin(datapath, cfile[ind_city]))
+        # pdl = pd.read_csv(pjoin(datapath, lfile))
         pdcl = pd.read_csv(pjoin(datapath, clfile[ind_city]))
 
         print('generating train_val_test csv')
