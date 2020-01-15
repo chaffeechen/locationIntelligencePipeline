@@ -192,10 +192,38 @@ def split2num(emp_range: str):
 def max_col(dat, col, minval=1):
     dat[col] = dat[col].apply(lambda r: max(r, minval))
 
+def comp_dat_process_salesforce(dat, one_hot_col_name, cont_col_name, do_dummy=True):
+    """
+    pd -> company key,cont_feature,spec_feature,dum_feature
+    for salesforce
+    """
+    if do_dummy:
+        print('doing one-hot...')
+        dum_dat = onehotdat(dat, one_hot_col_name)
+
+    print('extract continuous...')
+    cont_dat = dat[cont_col_name].fillna(value=0).astype(float)
+
+    if do_dummy:
+        res_dat = dat[['duns_number', 'city']].join([cont_dat, dum_dat], how='left')
+    else:
+        res_dat = dat[['duns_number', 'city']].join(cont_dat, how='left')
+
+    if do_dummy:
+        assert (len(res_dat) == len(dum_dat))
+    assert (len(res_dat) == len(cont_dat))
+    if do_dummy:
+        return {'data': res_dat,
+                'cont_feat_num': len(list(cont_dat.columns)),
+                'dum_feat_num': len(list(dum_dat.columns))}
+    else:
+        return {'data': res_dat,
+                'cont_feat_num': len(list(cont_dat.columns))}
 
 def comp_dat_process(dat, one_hot_col_name, cont_col_name, spec_col_name, do_dummy=True):
     """
     pd -> company key,cont_feature,spec_feature,dum_feature
+    for DnB
     """
     # one_hot_col_name = ['major_industry_category', 'location_type', 'primary_sic_2_digit']
     # spec_col_name = 'emp_here_range'
@@ -225,6 +253,7 @@ def comp_dat_process(dat, one_hot_col_name, cont_col_name, spec_col_name, do_dum
     assert (len(res_dat) == len(cont_dat))
     assert (len(res_dat) == len(spec_dat))
     return res_dat
+
 
 
 def location_dat_process(dat, one_hot_col_name, cont_col_name, do_dummy=True):

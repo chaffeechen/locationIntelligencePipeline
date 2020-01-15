@@ -1,7 +1,7 @@
 # import os
 # pjoin = os.path.join
 
-datapath = '/Users/yefeichen/Database/location_recommender_system/'
+datapath = '/home/ubuntu/location_recommender_system/'
 datapath_sf = datapath + 'salesforce/'
 
 
