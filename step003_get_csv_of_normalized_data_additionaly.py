@@ -25,9 +25,11 @@ if __name__ == '__main__':
     arg('--run_root', default='/Users/yefeichen/Database/location_recommender_system/')
     arg('--ls_card',default='location_scorecard_191113.csv')
     arg('--app_date',default='_191114')
+    arg('--dbname',default='tmp_table')
     args = parser.parse_args()
 
     datapath = args.run_root
+    datapath_mid = pjoin(datapath,args.dbname)
     cfile = ['dnb_pa.csv']
     app_date = args.app_date
     apps = app_date + '.csv'
@@ -80,12 +82,12 @@ if __name__ == '__main__':
     for ind_city in range(len(cfile)):
         pdc = pd.read_csv(pjoin(datapath, cfile[ind_city]))
         pdl = pd.read_csv(pjoin(datapath, lfile))
-        pdcl = pd.read_csv(pjoin(datapath, clfile[ind_city]))
+        pdcl = pd.read_csv(pjoin(datapath_mid, clfile[ind_city]))
 
         # building features
         col_list = list(pdl.columns)
         pdll = pdl.merge(pdcl, how='inner', on=['atlas_location_uuid'], suffixes=['', '_right'])
-        pdll = pdll[pdll['duns_number'].isnull() == False]
+        pdll = pdll.loc[pdll['duns_number'].notnull()]
         pdll = pdll.groupby(['atlas_location_uuid']).first().reset_index()
         pdll = pdll[col_list]
         pdlls.append(pdll)
@@ -106,16 +108,16 @@ if __name__ == '__main__':
     loc_one_hot_col_name = dummy_col_nameL #['building_class']
 
     print('one hot description loading...')
-    comp_coldict = load_obj(pjoin(datapath, 'comp_feat_dummy_param' + app_date))
-    loc_coldict = load_obj(pjoin(datapath, 'loc_feat_dummy_param' + app_date))
+    comp_coldict = load_obj(pjoin(datapath_mid, 'comp_feat_dummy_param' + app_date))
+    loc_coldict = load_obj(pjoin(datapath_mid, 'loc_feat_dummy_param' + app_date))
 
     print('dummy...')
     XD_comp = apply_dummy(coldict=comp_coldict, data=pdccs)
     XD_loc = apply_dummy(coldict=loc_coldict, data=pdlls)
 
     print('normalization descriptor loading...')
-    comp_norm_param = load_obj(pjoin(datapath, 'comp_feat_norm_param' + app_date))
-    loc_norm_param = load_obj(pjoin(datapath, 'loc_feat_norm_param' + app_date))
+    comp_norm_param = load_obj(pjoin(datapath_mid, 'comp_feat_norm_param' + app_date))
+    loc_norm_param = load_obj(pjoin(datapath_mid, 'loc_feat_norm_param' + app_date))
 
     print('normalization...')
 
@@ -153,8 +155,8 @@ if __name__ == '__main__':
     print('Done')
 
     # print('Final merge...')
-    dat_comp_pd.to_csv(pjoin(datapath, 'company_feat' + appsadd))
-    dat_loc_pd.to_csv(pjoin(datapath, 'location_feat' + appsadd))
+    dat_comp_pd.to_csv(pjoin(datapath_mid, 'company_feat' + appsadd))
+    dat_loc_pd.to_csv(pjoin(datapath_mid, 'location_feat' + appsadd))
     print('All Done')
 
     print(dat_comp_pd.shape,dat_loc_pd.shape)
