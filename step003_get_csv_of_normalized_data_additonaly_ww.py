@@ -109,7 +109,7 @@ if __name__ == '__main__':
     loc_norm_param = load_obj(pjoin(datapath_mid, 'loc_feat_norm_param' + app_date))
 
     print('normalization...')
-
+    pdccs['city'] = pdccs['physical_city']
     cont_comp = comp_dat_process(pdccs, one_hot_col_name=dummy_col_nameC,cont_col_name=cont_col_nameC,\
                                  spec_col_name=spec_col_nameC, do_dummy=False)
     cont_loc = location_dat_process(pdlls, one_hot_col_name=dummy_col_nameL,cont_col_name=cont_col_nameL, \
