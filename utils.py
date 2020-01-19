@@ -363,7 +363,7 @@ def apply_dummy(coldict: dict, data):
     enc = OneHotEncoder(handle_unknown='ignore', categories=cat_list)
 
     origin_dummy_col = [key for key in coldict]
-    result = enc.fit_transform(data[origin_dummy_col]).toarray()
+    result = enc.fit_transform(data[origin_dummy_col].fillna('unk')).toarray()
     # array to pd
     pd_new = pd.DataFrame(data=result, columns=dummy_name)
     return pd_new
