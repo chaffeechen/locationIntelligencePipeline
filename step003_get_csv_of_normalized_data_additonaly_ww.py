@@ -100,8 +100,8 @@ if __name__ == '__main__':
     loc_coldict = load_obj(pjoin(datapath_mid, 'loc_feat_dummy_param' + app_date))
 
     print('dummy...')
-    XD_loc = apply_dummy(coldict=loc_coldict, data=pdlls)
-    XD_comp = apply_dummy(coldict=comp_coldict, data=pdccs)
+    XD_loc,dummy_onehot_nameL = apply_dummy(coldict=loc_coldict, data=pdlls)
+    XD_comp,dummy_onehot_nameC = apply_dummy(coldict=comp_coldict, data=pdccs)
 
 
     print('normalization descriptor loading...')
@@ -129,9 +129,9 @@ if __name__ == '__main__':
     y_comp_name = key_col_comp
     y_loc_name = key_col_loc
     c_comp_name = cont_col_nameC
-    d_comp_name = dummy_col_nameC
+    d_comp_name = dummy_onehot_nameC
     c_loc_name = cont_col_nameL
-    d_loc_name = dummy_col_nameL
+    d_loc_name = dummy_onehot_nameL
 
 
     dat_comp_pd = pd.DataFrame(data=X_comp, columns=y_comp_name + c_comp_name + d_comp_name)

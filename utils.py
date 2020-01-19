@@ -366,7 +366,7 @@ def apply_dummy(coldict: dict, data):
     result = enc.fit_transform(data[origin_dummy_col].astype(str)).toarray()#py3.6 Bug
     # array to pd
     pd_new = pd.DataFrame(data=result, columns=dummy_name)
-    return pd_new
+    return pd_new,dummy_name
 
 
 # =======================================================================================================================
