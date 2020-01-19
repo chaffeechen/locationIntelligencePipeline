@@ -53,7 +53,7 @@ if __name__ == '__main__':
     bid = 'atlas_location_uuid'
     cid = 'duns_number'
 
-    print('Args:',datapath,apps,lfile,args.ratio)
+    print('Args:',datapath,apps,lfile)
 
     not_feat_col = feature_column['not_feat_col']
     cont_col_nameC = feature_column['cont_col_nameC']
