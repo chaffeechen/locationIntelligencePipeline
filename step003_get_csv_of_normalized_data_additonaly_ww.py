@@ -100,8 +100,9 @@ if __name__ == '__main__':
     loc_coldict = load_obj(pjoin(datapath_mid, 'loc_feat_dummy_param' + app_date))
 
     print('dummy...')
-    XD_comp = apply_dummy(coldict=comp_coldict, data=pdccs)
     XD_loc = apply_dummy(coldict=loc_coldict, data=pdlls)
+    XD_comp = apply_dummy(coldict=comp_coldict, data=pdccs)
+
 
     print('normalization descriptor loading...')
     comp_norm_param = load_obj(pjoin(datapath_mid, 'comp_feat_norm_param' + app_date))
