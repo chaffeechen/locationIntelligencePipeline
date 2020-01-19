@@ -18,6 +18,7 @@ from utils import *
 pjoin = os.path.join
 
 from header import *
+from dnb.data_loader import *
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -30,13 +31,27 @@ if __name__ == '__main__':
 
     datapath = args.run_root
     datapath_mid = pjoin(datapath,args.dbname)
-    cfile = ['dnb_pa.csv']
+
     app_date = args.app_date
     apps = app_date + '.csv'
-    appsadd = app_date+'_add.csv'
+    appsadd = app_date + '_add.csv'
+
+    dataloader = data_process(root_path=datapath)
+    dnb_city_lst = dataloader.load_dnb_city_lst(db=args.dbname,table='dnb_city_list'+apps)
+    """
+    "citylongname":citylongname,
+    "cityabbr":cityabbr,
+    "origin_comp_file":origin_comp_file,
+    """
+
+    cfile = dnb_city_lst['origin_comp_file']
+    clfile = dnb_city_lst['cityabbr']
+
     lfile = args.ls_card  # It is fixed as input
-    clfile = ['PA']
     clfile = [c + apps for c in clfile]
+
+    bid = 'atlas_location_uuid'
+    cid = 'duns_number'
 
     print('Args:',datapath,apps,lfile,args.ratio)
 
@@ -61,26 +76,17 @@ if __name__ == '__main__':
 
     pdlls = []  # all location feat pd list
     pdccs = []
+
+    pdl = pd.read_csv(pjoin(datapath, lfile),index_col=0)
     for ind_city in range(len(cfile)):
         pdc = pd.read_csv(pjoin(datapath, cfile[ind_city]))
-        pdl = pd.read_csv(pjoin(datapath, lfile))
-        pdcl = pd.read_csv(pjoin(datapath_mid, clfile[ind_city]))
-
-        # building features
-        col_list = list(pdl.columns)
-        pdll = pdl.merge(pdcl, how='inner', on=['atlas_location_uuid'], suffixes=['', '_right'])
-        pdll = pdll.loc[pdll['duns_number'].notnull()]
-        pdll = pdll.groupby(['atlas_location_uuid']).first().reset_index()
-        pdll = pdll[col_list]
-        pdlls.append(pdll)
-
-        # company feature
         pdccs.append(pdc)
 
     # for loop end
     # building feature
     # company feature
-    pdlls = pd.concat(pdlls, axis=0).reset_index(drop=True)
+    # pdlls = pd.concat(pdlls, axis=0).reset_index(drop=True)
+    pdlls = pdl.reset_index()
     pdccs = pd.concat(pdccs, axis=0).reset_index(drop=True)
 
     print('start processing company and location feature...')
