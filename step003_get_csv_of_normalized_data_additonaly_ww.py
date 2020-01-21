@@ -123,7 +123,7 @@ if __name__ == '__main__':
     y_comp_name = key_col_comp.append('city')
     y_loc_name = key_col_loc.append('city')
 
-    Y_loc = pdlls[y_loc_name].to_numpy()
+    Y_loc = pdlls[y_loc_name].fillna('none').to_numpy()
     Y_comp = pdccs[y_comp_name].to_numpy()
 
     X_comp = np.concatenate([Y_comp, XC_comp, XD_comp], axis=1)
