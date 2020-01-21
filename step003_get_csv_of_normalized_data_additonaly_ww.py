@@ -120,8 +120,10 @@ if __name__ == '__main__':
     XC_loc = apply_para_normalize_dat(cont_loc['data'][cont_col_nameL], loc_norm_param['C_loc'],
                                              loc_norm_param['S_loc'])
 
-    y_comp_name = key_col_comp.append('city')
-    y_loc_name = key_col_loc.append('city')
+    y_comp_name = key_col_comp
+    y_comp_name.append('city')
+    y_loc_name = key_col_loc
+    y_comp_name.append('city')
 
     assert('city' in pdlls.columns)
     Y_loc = pdlls[y_loc_name].fillna('none').to_numpy()
