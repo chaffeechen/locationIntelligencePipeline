@@ -141,7 +141,7 @@ if __name__ == '__main__':
     dat_comp_pd = pd.DataFrame(data=X_comp, columns=y_comp_name + c_comp_name + d_comp_name)
     dat_loc_pd = pd.DataFrame(data=X_loc, columns=y_loc_name + c_loc_name + d_loc_name)
 
-    print(dat_comp_pd[:,2:].to_numpy().mean())
+    print(dat_comp_pd.to_numpy()[:,2:].mean())
     print(dat_loc_pd.to_numpy()[:, 2:].mean())
     print(dat_comp_pd.shape)
 
