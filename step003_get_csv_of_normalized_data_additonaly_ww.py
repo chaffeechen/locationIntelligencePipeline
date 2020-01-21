@@ -123,7 +123,7 @@ if __name__ == '__main__':
     y_comp_name = key_col_comp
     y_comp_name.append('city')
     y_loc_name = key_col_loc
-    y_comp_name.append('city')
+    y_loc_name.append('city')
 
     assert('city' in pdlls.columns)
     Y_loc = pdlls[y_loc_name].fillna('none').to_numpy()
