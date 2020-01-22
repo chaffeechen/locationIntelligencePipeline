@@ -129,6 +129,7 @@ if __name__ == '__main__':
     Y_loc = pdlls[y_loc_name].fillna('none').to_numpy()
     Y_comp = pdccs[y_comp_name].to_numpy()
 
+    print('concating')
     X_comp = np.concatenate([Y_comp, XC_comp, XD_comp], axis=1)
     X_loc = np.concatenate([Y_loc, XC_loc, XD_loc], axis=1)
 
@@ -137,7 +138,7 @@ if __name__ == '__main__':
     c_loc_name = cont_col_nameL
     d_loc_name = dummy_onehot_nameL
 
-
+    print('numpy 2 pandas')
     dat_comp_pd = pd.DataFrame(data=X_comp, columns=y_comp_name + c_comp_name + d_comp_name)
     dat_loc_pd = pd.DataFrame(data=X_loc, columns=y_loc_name + c_loc_name + d_loc_name)
 
