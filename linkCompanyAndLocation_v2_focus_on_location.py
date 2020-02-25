@@ -161,6 +161,7 @@ if __name__ == '__main__':
     arg('--geo_bit',type=int,default=6)
     arg('--dist_thresh',type=float,default=500)
     arg('--single',action='store_true',help='each company has a unique location')
+    arg('--city_id',default=-1)
     args = parser.parse_args()
 
 
@@ -181,13 +182,23 @@ if __name__ == '__main__':
     pdl = pd.read_csv(pjoin(datapath, lfile))
 
     #shrink into 1 code
-    for ind_city in range(5):
-        pdc = pd.read_csv(pjoin(datapath, cfile[ind_city]))
+    if args.city_id > 0:
+        for ind_city in range(5):
+            pdc = pd.read_csv(pjoin(datapath, cfile[ind_city]))
+            if args.single:
+                linkCL = fuzzy_geosearch(pdc, pdl, precision=[8, 7, 6], thresh=[500, 1000, 1000])
+            else:
+                linkCL = fuzzy_geosearchv2(pdc,pdl,precision=precision,thresh=dist_thresh)
+            print(len(linkCL))
+            linkCL.to_csv(pjoin(datapath,clfile[ind_city]),index = None, header=True)
+    else:
+        pdc = pd.read_csv(pjoin(datapath, cfile[args.city_id]))
         if args.single:
-            linkCL = fuzzy_geosearch(pdc, pdl, precision=[8, 7, 6], thresh=[500, 1000, 1000])
+            linkCL = fuzzy_geosearch(pdc, pdl, precision=[7,6], thresh=[500, 1000])
         else:
-            linkCL = fuzzy_geosearchv2(pdc,pdl,precision=precision,thresh=dist_thresh)
+            linkCL = fuzzy_geosearchv2(pdc, pdl, precision=precision, thresh=dist_thresh)
         print(len(linkCL))
-        linkCL.to_csv(pjoin(datapath,clfile[ind_city]),index = None, header=True)
+        linkCL.to_csv(pjoin(datapath, clfile[args.city_id]), index=None, header=True)
+
 
 
