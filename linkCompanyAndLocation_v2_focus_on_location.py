@@ -184,7 +184,7 @@ if __name__ == '__main__':
     for ind_city in range(5):
         pdc = pd.read_csv(pjoin(datapath, cfile[ind_city]))
         if args.single:
-            linkCL = fuzzy_geosearch(pdc, pdl)
+            linkCL = fuzzy_geosearch(pdc, pdl, precision=[8, 7, 6], thresh=[500, 1000, 1000])
         else:
             linkCL = fuzzy_geosearchv2(pdc,pdl,precision=precision,thresh=dist_thresh)
         print(len(linkCL))
