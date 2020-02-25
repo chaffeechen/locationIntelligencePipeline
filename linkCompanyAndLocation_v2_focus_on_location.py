@@ -182,7 +182,7 @@ if __name__ == '__main__':
     pdl = pd.read_csv(pjoin(datapath, lfile))
 
     #shrink into 1 code
-    if args.city_id > 0:
+    if args.city_id < 0:
         for ind_city in range(5):
             pdc = pd.read_csv(pjoin(datapath, cfile[ind_city]))
             if args.single:
