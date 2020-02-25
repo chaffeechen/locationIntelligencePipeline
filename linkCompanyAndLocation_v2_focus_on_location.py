@@ -160,6 +160,7 @@ if __name__ == '__main__':
     arg('--apps',default='_191114.csv')
     arg('--geo_bit',type=int,default=6)
     arg('--dist_thresh',type=float,default=500)
+    arg('--single',action='store_true',help='each company has a unique location')
     args = parser.parse_args()
 
 
@@ -182,7 +183,10 @@ if __name__ == '__main__':
     #shrink into 1 code
     for ind_city in range(5):
         pdc = pd.read_csv(pjoin(datapath, cfile[ind_city]))
-        linkCL = fuzzy_geosearchv2(pdc,pdl,precision=precision,thresh=dist_thresh)
+        if args.single:
+            linkCL = fuzzy_geosearch(pdc, pdl)
+        else:
+            linkCL = fuzzy_geosearchv2(pdc,pdl,precision=precision,thresh=dist_thresh)
         print(len(linkCL))
         linkCL.to_csv(pjoin(datapath,clfile[ind_city]),index = None, header=True)
 
