@@ -161,7 +161,7 @@ if __name__ == '__main__':
     arg('--geo_bit',type=int,default=6)
     arg('--dist_thresh',type=float,default=500)
     arg('--single',action='store_true',help='each company has a unique location')
-    arg('--city_id',default=-1)
+    arg('--city_id',type=int,default=-1)
     args = parser.parse_args()
 
 
